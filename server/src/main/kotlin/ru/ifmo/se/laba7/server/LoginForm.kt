@@ -1,30 +1,26 @@
 package ru.ifmo.se.laba7.server
 
 import javafx.application.Application
+import javafx.beans.value.ChangeListener
+import javafx.beans.value.ObservableValue
+import javafx.collections.FXCollections
 import javafx.event.EventHandler
-import javafx.geometry.Pos
 import javafx.scene.Scene
-import javafx.stage.*
-import javafx.scene.control.Button
-import javafx.scene.control.Label
-import javafx.scene.control.PasswordField
-import javafx.scene.control.TextField
+import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.input.KeyCombination
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
-import javafx.scene.text.Text
 import javafx.stage.Stage
 import java.io.*
 
+
 class LoginForm : Application() {
+
     private val userController = UserController()
 
-    override fun start(primaryStage: Stage) {
-
-
+    fun createLoginForm(primaryStage: Stage): Scene {
 
         val connect = Button("Connect")
         val register = Button("Registration")
@@ -98,35 +94,27 @@ class LoginForm : Application() {
         loginform.children.add(roundButton)
         AnchorPane.setBottomAnchor(roundButton, 5.0)
         AnchorPane.setLeftAnchor(roundButton, 5.0)
-
-        primaryStage.apply {
-            title = "OR_ASS 1.001 alpha(server) LOGIN"
-            scene = Scene(loginform, 350.0, 350.0)
-            isFullScreen = false
-            isResizable = false
-            show()
-        }
-
         connect.onAction = EventHandler {
             if (userController.login(login.text, pswrd.text)) {
                 println("Success")
-                loginform.children.clear()
-                primaryStage.fullScreenExitKeyCombination = KeyCombination.NO_MATCH
-                primaryStage.isFullScreen = true
+                primaryStage.apply {
+                    scene = createServerForm()
+                    isResizable = true
+                }
             } else
                 name.textFill = Color.BLACK
-                name1.textFill = Color.BLACK
-                when (selectedImage.image) {
-                    image1 -> selectedImage.image = err_image1
-                    image2 -> selectedImage.image = err_image2
-                }
-                if (!loginform.children.contains(accesDenied)) {
-                    loginform.children.add(accesDenied)
-                    AnchorPane.setTopAnchor(accesDenied, 247.0)
-                    AnchorPane.setRightAnchor(accesDenied, 7.0)
-                }
-                login.clear()
-                pswrd.clear()
+            name1.textFill = Color.BLACK
+            when (selectedImage.image) {
+                image1 -> selectedImage.image = err_image1
+                image2 -> selectedImage.image = err_image2
+            }
+            if (!loginform.children.contains(accesDenied)) {
+                loginform.children.add(accesDenied)
+                AnchorPane.setTopAnchor(accesDenied, 247.0)
+                AnchorPane.setRightAnchor(accesDenied, 7.0)
+            }
+            login.clear()
+            pswrd.clear()
         }
 
         roundButton.onAction = EventHandler {
@@ -156,5 +144,86 @@ class LoginForm : Application() {
                 name1.textFill = Color.WHITE
             }
         }
+
+        return Scene(loginform, 350.0, 350.0)
+    }
+
+    fun createServerForm(): Scene{
+        val x = Label("x:")
+        x.font = (Font("Courier New", 16.0))
+        val y = Label("y:")
+        y.font = (Font("Courier New", 16.0))
+        val addB = Button("Add")
+        val name_field = TextField("Name")
+        val coolnessIndex = TextField("Experience index")
+        val color = ComboBox<String>(FXCollections.observableArrayList<String>("Green", "Red", "Blue", "Yellow"))
+        val sliderX = Slider().apply {
+            min = 0.0
+            max = 1500.0
+            value = 750.0
+        }
+        val sliderY = Slider().apply {
+            min = 0.0
+            max = 1500.0
+            value = 750.0
+        }
+        val levelX = Label(sliderX.value.toString())
+        val levelY = Label(sliderY.value.toString())
+        val server = AnchorPane()
+        // Add-block
+        server.children.add(x)
+        AnchorPane.setLeftAnchor(x, 10.0)
+        AnchorPane.setBottomAnchor(x, 50.0)
+
+        server.children.add(sliderX)
+        AnchorPane.setBottomAnchor(sliderX, 35.0)
+        AnchorPane.setLeftAnchor(sliderX, 10.0)
+
+        server.children.add(y)
+        AnchorPane.setLeftAnchor(y, 10.0)
+        AnchorPane.setBottomAnchor(y, 20.0)
+
+        server.children.add(sliderY)
+        AnchorPane.setLeftAnchor(sliderY, 10.0)
+        AnchorPane.setBottomAnchor(sliderY, 5.0)
+
+        server.children.add(levelX)
+        AnchorPane.setLeftAnchor(levelX, 35.0)
+        AnchorPane.setBottomAnchor(levelX, 50.0)
+
+        server.children.add(levelY)
+        AnchorPane.setLeftAnchor(levelY, 35.0)
+        AnchorPane.setBottomAnchor(levelY, 20.0)
+
+        sliderX.valueProperty().addListener { _, _old, new ->
+            levelX.text = String.format("%.2f", new)
+        }
+
+        sliderY.valueProperty().addListener { _, _old, new ->
+            levelY.text = String.format("%.2f", new)
+        }
+
+//        sliderX.valueProperty().addListener(ChangeListener<Number>() {
+//
+//            fun changed(ov: ObservableValue<out Number>,
+//                        old_val: Number, new_val: Number) {
+//                sliderX.value = new_val.toDouble()
+//                levelX.text =
+//            }
+//        })
+        // end-of-add-block
+
+        return Scene(server, 500.0, 200.0)
+    }
+
+    override fun start(primaryStage: Stage) {
+        primaryStage.apply {
+            title = "OR_ASS 1.001 alpha(server)"
+            scene = createLoginForm(this)
+            isFullScreen = false
+            isResizable = false
+            show()
+        }
+
     }
 }

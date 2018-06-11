@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class UserCollection : ConcurrentLinkedDeque<Astronaut>() {
     companion object {
-        const val astronauts_datafile = "F:\\ITMO\\Programming\\laba7\\server\\res\\users.json"
+        const val astronauts_datafile = "F:\\ITMO\\Programming\\laba7\\server\\res\\astronauts.csv"
     }
 
 
