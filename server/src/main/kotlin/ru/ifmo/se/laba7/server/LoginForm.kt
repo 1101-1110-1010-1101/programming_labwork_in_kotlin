@@ -149,14 +149,15 @@ class LoginForm : Application() {
     }
 
     fun createServerForm(): Scene{
-        val x = Label("x:")
-        x.font = (Font("Courier New", 16.0))
-        val y = Label("y:")
-        y.font = (Font("Courier New", 16.0))
+        val mainFont = Font("Courier New", 16.0)
+        val x = Label("x:").apply { font = mainFont }
+        val y = Label("y:").apply { font = mainFont }
         val addB = Button("Add")
-        val name_field = TextField("Name")
-        val coolnessIndex = TextField("Experience index")
-        val color = ComboBox<String>(FXCollections.observableArrayList<String>("Green", "Red", "Blue", "Yellow"))
+        val nameField = TextField().apply { promptText = "Name" }
+        val coolnessIndex = TextField().apply { promptText = "Experience" }
+        val color = ComboBox<String>(FXCollections.observableArrayList<String>("Green", "Red", "Blue", "Yellow")).apply {
+            selectionModel.selectFirst()
+        }
         val sliderX = Slider().apply {
             min = 0.0
             max = 1500.0
@@ -195,22 +196,35 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(levelY, 35.0)
         AnchorPane.setBottomAnchor(levelY, 20.0)
 
-        sliderX.valueProperty().addListener { _, _old, new ->
+        sliderX.valueProperty().addListener { _, _, new ->
             levelX.text = String.format("%.2f", new)
         }
 
-        sliderY.valueProperty().addListener { _, _old, new ->
+        sliderY.valueProperty().addListener { _, _, new ->
             levelY.text = String.format("%.2f", new)
         }
 
-//        sliderX.valueProperty().addListener(ChangeListener<Number>() {
-//
-//            fun changed(ov: ObservableValue<out Number>,
-//                        old_val: Number, new_val: Number) {
-//                sliderX.value = new_val.toDouble()
-//                levelX.text =
-//            }
-//        })
+        server.children.add(nameField)
+        AnchorPane.setBottomAnchor(nameField, 70.0)
+        AnchorPane.setLeftAnchor(nameField, 10.0)
+
+        server.children.add(coolnessIndex)
+        AnchorPane.setLeftAnchor(coolnessIndex, 10.0)
+        AnchorPane.setBottomAnchor(coolnessIndex, 100.0)
+
+        server.children.add(color)
+        AnchorPane.setLeftAnchor(color, 10.0)
+        AnchorPane.setBottomAnchor(color, 130.0)
+
+        server.children.add(addB)
+        AnchorPane.setBottomAnchor(addB, 160.0)
+        AnchorPane.setLeftAnchor(addB, 10.0)
+
+        addB.onAction = EventHandler {
+            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            print("Created new astronaut:")
+            print(a.toString())
+        }
         // end-of-add-block
 
         return Scene(server, 500.0, 200.0)
