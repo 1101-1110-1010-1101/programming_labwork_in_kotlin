@@ -1,21 +1,13 @@
 package ru.ifmo.se.laba7.server
 
-import com.google.gson.Gson
+import java.io.File
 import java.time.LocalDate
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.LinkedBlockingQueue
-
 
 class UserCollection : ConcurrentLinkedDeque<Astronaut>() {
     companion object {
         const val astronauts_datafile = "F:\\ITMO\\Programming\\laba7\\server\\res\\astronauts.csv"
     }
-
-
-
-    val json: Gson = Gson()
 
     val initDate = LocalDate.now()
 
@@ -28,13 +20,23 @@ class UserCollection : ConcurrentLinkedDeque<Astronaut>() {
                 "\n*** Team list ***\n" + it + "\n*** End of Team list ***"
     }
 
-    fun remove_first() = this.pollFirst()
+    fun remove_first() {
+        println("${this.max()?.name} is removed from the team")
+        this.remove(max())
+        this.save()
+    }
 
-    fun remove_last() = this.pollLast()
+    fun remove_last() {
+        println("${this.min()?.name} is removed from the team")
+        this.remove(min())
+        this.save()
+    }
 
-    fun removeIfGreater(json_str: String) = json.fromJson(json_str, Astronaut::class.java).let { a -> this.removeIf { it > a } }
+    fun removeIfGreater(csv_srt: String) = Astronaut.parseCsv(csv_srt).let { a -> this.removeIf { it > a } }
 
-    fun add(json_str: String) = this.add(json.fromJson(json_str, Astronaut::class.java))
+    fun addIfMax(csv_srt: String) = Astronaut.parseCsv(csv_srt).let { a -> if (this.none { it > a }) this.add(a) }
 
-    fun addIfMax(json_str: String) = json.fromJson(json_str, Astronaut::class.java).let { a -> if (this.none { it > a }) this.add(a) }
+    fun load() = File(astronauts_datafile).readLines().map { line -> this.add(Astronaut.parseCsv(line)) }
+
+    fun save() = File(astronauts_datafile).let { f -> f.writeText(this.map { it.csv() }.joinToString("\n")) }
 }

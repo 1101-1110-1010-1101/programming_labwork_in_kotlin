@@ -1,8 +1,6 @@
 package ru.ifmo.se.laba7.server
 
 import javafx.application.Application
-import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.event.EventHandler
 import javafx.scene.Scene
@@ -17,6 +15,10 @@ import java.io.*
 
 
 class LoginForm : Application() {
+
+    companion object {
+        @Volatile var message = ""
+    }
 
     private val userController = UserController()
 
@@ -96,7 +98,6 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(roundButton, 5.0)
         connect.onAction = EventHandler {
             if (userController.login(login.text, pswrd.text)) {
-                println("Success")
                 primaryStage.apply {
                     scene = createServerForm()
                     isResizable = true
@@ -152,7 +153,14 @@ class LoginForm : Application() {
         val mainFont = Font("Courier New", 16.0)
         val x = Label("x:").apply { font = mainFont }
         val y = Label("y:").apply { font = mainFont }
+        val save = Button("Save")
+        val load = Button("Load")
+        val remove = Label("Remove:").apply { font = mainFont }
+        val first = Button("First")
+        val last = Button("Last")
         val addB = Button("Add")
+        val addIfMax = Button("Add If Max")
+        val removeGreater = Button("Remove Greater")
         val nameField = TextField().apply { promptText = "Name" }
         val coolnessIndex = TextField().apply { promptText = "Experience" }
         val color = ComboBox<String>(FXCollections.observableArrayList<String>("Green", "Red", "Blue", "Yellow")).apply {
@@ -220,14 +228,59 @@ class LoginForm : Application() {
         AnchorPane.setBottomAnchor(addB, 160.0)
         AnchorPane.setLeftAnchor(addB, 10.0)
 
+        server.children.add(addIfMax)
+        AnchorPane.setBottomAnchor(addIfMax, 160.0)
+        AnchorPane.setLeftAnchor(addIfMax, 50.0)
+
+        server.children.add(removeGreater)
+        AnchorPane.setLeftAnchor(removeGreater, 10.0)
+        AnchorPane.setBottomAnchor(removeGreater, 190.0)
+
+        server.children.apply {
+            add(first)
+            add(last)
+            add(remove)
+        }
+        AnchorPane.setBottomAnchor(first, 220.0)
+        AnchorPane.setBottomAnchor(last, 220.0)
+        AnchorPane.setBottomAnchor(remove, 243.0)
+        AnchorPane.setLeftAnchor(first, 10.0)
+        AnchorPane.setLeftAnchor(last, 52.0)
+        AnchorPane.setLeftAnchor(remove, 10.0)
+
+        server.children.apply {
+            add(save)
+            add(load)
+        }
+        AnchorPane.setBottomAnchor(save, 263.0)
+        AnchorPane.setBottomAnchor(load, 263.0)
+        AnchorPane.setLeftAnchor(save, 10.0)
+        AnchorPane.setLeftAnchor(load, 52.0)
+
         addB.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
-            print("Created new astronaut:")
-            print(a.toString())
+            message = "add ${a.csv()}"
         }
-        // end-of-add-block
 
-        return Scene(server, 500.0, 200.0)
+        addIfMax.onAction = EventHandler {
+            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            message = "add_if_max ${a.csv()}"
+        }
+
+        removeGreater.onAction = EventHandler {
+            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            message = "remove_if_greater ${a.csv()}"
+        }
+
+        first.onAction = EventHandler { message = "remove_first ok?" }
+
+        last.onAction = EventHandler { message = "remove_last ok?" }
+
+        save.onAction = EventHandler { message = "save ok?" }
+
+        load.onAction = EventHandler { message = "load ok?" }
+
+        return Scene(server, 500.0, 300.0)
     }
 
     override fun start(primaryStage: Stage) {
@@ -238,6 +291,5 @@ class LoginForm : Application() {
             isResizable = false
             show()
         }
-
     }
 }
