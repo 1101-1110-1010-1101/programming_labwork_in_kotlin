@@ -2,16 +2,21 @@ package ru.ifmo.se.laba7.server
 
 import javafx.application.Application
 import kotlinx.coroutines.experimental.*
+import java.util.concurrent.Exchanger
+
 
 fun main(args: Array<String>) {
 
+    val ex = LoginForm.ex
     // I`m a GUI thread!
     launch {
         Application.launch(LoginForm::class.java)
     }
     // I`m the main thread!
+
     val collection = UserCollection()
     collection.load()
+    ex.exchange(collection)
     // I`m a GUI listener!
     launch {
         while (true) {
@@ -24,21 +29,29 @@ fun main(args: Array<String>) {
                         collection.add(Astronaut.parseCsv(argument))
                         println("${argument.substringBefore(",")} is added to team")
                         collection.save()
+                        ex.exchange(collection)
                     }
                     "add_if_max" -> {
                         println(collection.size)
                         collection.addIfMax(argument)
                         println(collection.size)
                         collection.save()
+                        ex.exchange(collection)
                     }
                     "remove_if_greater" -> {
                         println(collection.size)
                         collection.removeIfGreater(argument)
                         println(collection.size)
                         collection.save()
+                        ex.exchange(collection)
                     }
-                    "remove_first" -> collection.remove_first()
-                    "remove_last" -> collection.remove_last()
+                    "remove_first" -> {collection.remove_first()
+                        ex.exchange(collection)
+                    }
+                    "remove_last" -> {
+                        collection.remove_last()
+                        ex.exchange(collection)
+                    }
                     "save" -> {
                         collection.save()
                         println("Data is saved to ${UserCollection.astronauts_datafile}")

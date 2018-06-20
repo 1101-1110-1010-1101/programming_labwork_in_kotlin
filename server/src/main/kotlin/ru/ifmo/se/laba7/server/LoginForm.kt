@@ -1,10 +1,13 @@
 package ru.ifmo.se.laba7.server
 
 import javafx.application.Application
+import javafx.beans.Observable
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.*
+import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
@@ -12,14 +15,15 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.stage.Stage
 import java.io.*
-
+import java.util.concurrent.Exchanger
 
 class LoginForm : Application() {
 
     companion object {
+        @Volatile var ex = Exchanger<UserCollection>()
         @Volatile var message = ""
     }
-
+    val col = UserCollection()
     private val userController = UserController()
 
     fun createLoginForm(primaryStage: Stage): Scene {
@@ -257,28 +261,48 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(save, 10.0)
         AnchorPane.setLeftAnchor(load, 52.0)
 
+        val columnName = TableColumn<Astronaut, String>("Name")
+        columnName.cellValueFactory = PropertyValueFactory<Astronaut, String>("name")
+        val table = TableView<Astronaut>()
+        table.isEditable = true
+        table.columns.addAll(columnName)
+        server.children.add(table)
+        table.prefHeight = 250.0
+        AnchorPane.setLeftAnchor(table, 150.0)
+        table.items = refreshTable()
+
+
         addB.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
             message = "add ${a.csv()}"
+            table.items = refreshTable()
         }
 
         addIfMax.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
             message = "add_if_max ${a.csv()}"
+            table.items = refreshTable()
         }
 
         removeGreater.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
             message = "remove_if_greater ${a.csv()}"
+            table.items = refreshTable()
         }
 
-        first.onAction = EventHandler { message = "remove_first ok?" }
+        first.onAction = EventHandler { message = "remove_first ok?"
+            table.items = refreshTable()
+        }
 
-        last.onAction = EventHandler { message = "remove_last ok?" }
+        last.onAction = EventHandler { message = "remove_last ok?"
+            table.items = refreshTable()
+        }
 
         save.onAction = EventHandler { message = "save ok?" }
 
-        load.onAction = EventHandler { message = "load ok?" }
+        load.onAction = EventHandler { message = "load ok?"
+            table.items = refreshTable()
+        }
 
         return Scene(server, 500.0, 300.0)
     }
@@ -291,5 +315,9 @@ class LoginForm : Application() {
             isResizable = false
             show()
         }
+    }
+    fun refreshTable(): ObservableList<Astronaut>{
+        val astrs = ex.exchange(col)
+        return FXCollections.observableArrayList<Astronaut>(astrs)
     }
 }

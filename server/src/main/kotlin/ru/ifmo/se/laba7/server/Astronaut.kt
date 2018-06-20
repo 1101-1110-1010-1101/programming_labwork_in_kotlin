@@ -26,6 +26,7 @@ data class Astronaut (
         fun parseCsv(csv: String): Astronaut =
                 csv.split(',').let { Astronaut(it[0], Coordinates(it[1].toDouble(), it[2].toDouble()), it[3].toInt(), Colors.stringToColor(it[4]), LocalDate.parse(it[5])) }
     }
+    fun get_name() = this.name
 
     override fun compareTo(other: Astronaut) = com.compare(this, other)
 }
