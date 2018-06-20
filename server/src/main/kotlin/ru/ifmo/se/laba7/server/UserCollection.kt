@@ -23,13 +23,11 @@ class UserCollection : ConcurrentLinkedDeque<Astronaut>() {
     fun remove_first() {
         println("${this.max()?.name} is removed from the team")
         this.remove(max())
-        this.save()
     }
 
     fun remove_last() {
         println("${this.min()?.name} is removed from the team")
         this.remove(min())
-        this.save()
     }
 
     fun removeIfGreater(csv_srt: String) = Astronaut.parseCsv(csv_srt).let { a -> this.removeIf { it > a } }

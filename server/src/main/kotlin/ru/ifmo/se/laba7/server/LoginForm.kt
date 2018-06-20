@@ -15,6 +15,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.stage.Stage
 import java.io.*
+import java.time.LocalDate
 import java.util.concurrent.Exchanger
 
 class LoginForm : Application() {
@@ -104,7 +105,6 @@ class LoginForm : Application() {
             if (userController.login(login.text, pswrd.text)) {
                 primaryStage.apply {
                     scene = createServerForm()
-                    isResizable = true
                 }
             } else
                 name.textFill = Color.BLACK
@@ -157,8 +157,6 @@ class LoginForm : Application() {
         val mainFont = Font("Courier New", 16.0)
         val x = Label("x:").apply { font = mainFont }
         val y = Label("y:").apply { font = mainFont }
-        val save = Button("Save")
-        val load = Button("Load")
         val remove = Label("Remove:").apply { font = mainFont }
         val first = Button("First")
         val last = Button("Last")
@@ -252,26 +250,33 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(last, 52.0)
         AnchorPane.setLeftAnchor(remove, 10.0)
 
-        server.children.apply {
-            add(save)
-            add(load)
-        }
-        AnchorPane.setBottomAnchor(save, 263.0)
-        AnchorPane.setBottomAnchor(load, 263.0)
-        AnchorPane.setLeftAnchor(save, 10.0)
-        AnchorPane.setLeftAnchor(load, 52.0)
-
         val columnName = TableColumn<Astronaut, String>("Name")
         columnName.cellValueFactory = PropertyValueFactory<Astronaut, String>("name")
+        columnName.isResizable = false
+        columnName.prefWidth = 65.0
+        val columnX = TableColumn<Astronaut, String>("Coordinates")
+        columnX.cellValueFactory = PropertyValueFactory<Astronaut, String>("printCoors")
+        columnX.prefWidth = 100.0
+        columnX.isResizable = false
+        val columnClns = TableColumn<Astronaut, Int>("Experience")
+        columnClns.cellValueFactory = PropertyValueFactory<Astronaut, Int>("coolnessIndex")
+        columnClns.prefWidth = 90.0
+        columnClns.isResizable = false
+        val columnColor = TableColumn<Astronaut, Colors>("Color")
+        columnColor.cellValueFactory = PropertyValueFactory<Astronaut, Colors>("color")
+        columnColor.prefWidth = 65.0
+        val columnDate = TableColumn<Astronaut, LocalDate>("Init Date")
+        columnDate.cellValueFactory = PropertyValueFactory<Astronaut, LocalDate>("initDate")
+        columnDate.prefWidth = 75.0
         val table = TableView<Astronaut>()
         table.isEditable = true
-        table.columns.addAll(columnName)
+        table.columns.addAll(columnName, columnX, columnClns, columnColor, columnDate)
         server.children.add(table)
-        table.prefHeight = 250.0
-        AnchorPane.setLeftAnchor(table, 150.0)
+        table.prefHeight = 260.0
+        table.prefWidth = 397.0
+        AnchorPane.setLeftAnchor(table, 170.0)
+        AnchorPane.setTopAnchor(table, 30.0)
         table.items = refreshTable()
-
-
         addB.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
             message = "add ${a.csv()}"
@@ -298,13 +303,21 @@ class LoginForm : Application() {
             table.items = refreshTable()
         }
 
-        save.onAction = EventHandler { message = "save ok?" }
 
-        load.onAction = EventHandler { message = "load ok?"
+        val menuBar = MenuBar()
+        menuBar.prefWidth = 580.0
+        val save_load = Menu("File")
+        val saveM = MenuItem("Save")
+        saveM.onAction = EventHandler { message = "save ok?" }
+        val loadM = MenuItem("Load")
+        loadM.onAction = EventHandler { message = "load ok?"
             table.items = refreshTable()
         }
+        save_load.items.addAll(saveM, loadM)
+        menuBar.menus.addAll(save_load)
+        server.children.add(menuBar)
 
-        return Scene(server, 500.0, 300.0)
+        return Scene(server, 580.0, 300.0)
     }
 
     override fun start(primaryStage: Stage) {
@@ -316,6 +329,7 @@ class LoginForm : Application() {
             show()
         }
     }
+
     fun refreshTable(): ObservableList<Astronaut>{
         val astrs = ex.exchange(col)
         return FXCollections.observableArrayList<Astronaut>(astrs)

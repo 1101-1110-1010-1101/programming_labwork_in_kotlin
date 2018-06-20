@@ -16,6 +16,7 @@ fun main(args: Array<String>) {
 
     val collection = UserCollection()
     collection.load()
+    collection.sorted()
     ex.exchange(collection)
     // I`m a GUI listener!
     launch {
@@ -28,21 +29,18 @@ fun main(args: Array<String>) {
                     "add" -> {
                         collection.add(Astronaut.parseCsv(argument))
                         println("${argument.substringBefore(",")} is added to team")
-                        collection.save()
                         ex.exchange(collection)
                     }
                     "add_if_max" -> {
                         println(collection.size)
                         collection.addIfMax(argument)
                         println(collection.size)
-                        collection.save()
                         ex.exchange(collection)
                     }
                     "remove_if_greater" -> {
                         println(collection.size)
                         collection.removeIfGreater(argument)
                         println(collection.size)
-                        collection.save()
                         ex.exchange(collection)
                     }
                     "remove_first" -> {collection.remove_first()
@@ -57,8 +55,10 @@ fun main(args: Array<String>) {
                         println("Data is saved to ${UserCollection.astronauts_datafile}")
                     }
                     "load" -> {
+                        collection.clear()
                         collection.load()
                         println("Data is loaded from ${UserCollection.astronauts_datafile}")
+                        ex.exchange(collection)
                     }
                 }
             }

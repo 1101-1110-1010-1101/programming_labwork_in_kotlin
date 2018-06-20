@@ -13,7 +13,7 @@ data class Astronaut (
         val initDate: LocalDate = LocalDate.now()
 ): Comparable<Astronaut> {
     val distance = Math.sqrt(Math.pow(this.coordinates.x, 2.0) + Math.pow(this.coordinates.y, 2.0))
-
+    public val printCoors = String.format("%.2f", coordinates.x) + " " + String.format("%.2f", coordinates.x)
     data class Coordinates(val x: Double, val y: Double) {
         override fun toString(): String = this.x.toString() + ',' + this.y.toString()
     }
