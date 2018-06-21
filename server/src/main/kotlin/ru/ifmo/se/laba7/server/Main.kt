@@ -12,19 +12,17 @@ fun main(args: Array<String>) {
     launch {
         Application.launch(LoginForm::class.java)
     }
+    // I`m the main thread!
     val ex = LoginForm.ex
     val collection = UserCollection()
     collection.load()
     collection.sorted()
     ex.exchange(collection)
-    var forKlient = collection.map { it.csv() }.joinToString("||")
-    println(forKlient)
-    Connector.m = forKlient
+    Connector.m = collection.map { it.csv() }.joinToString("||")
+    // I`m the client listener!
     launch {
         bridge.run()
     }
-
-    // I`m the main thread!
 
 
     // I`m a GUI listener!

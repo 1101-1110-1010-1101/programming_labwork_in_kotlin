@@ -7,7 +7,7 @@ import kotlin.Comparator
 
 data class Astronaut (
         val name: String = "",
-        val coordinates: Coordinates = Coordinates(Random().nextDouble() * Random().nextInt(1000), Random().nextDouble()* Random().nextInt(1000)),
+        val coordinates: Coordinates = Coordinates(Random().nextDouble() * Random().nextInt(1500) - 750, Random().nextDouble()* Random().nextInt(1500) - 750),
         val coolnessIndex: Int = Random().nextInt(1000) + 500,
         val color: Colors = Colors.Blue,
         val initDate: LocalDate = LocalDate.now()

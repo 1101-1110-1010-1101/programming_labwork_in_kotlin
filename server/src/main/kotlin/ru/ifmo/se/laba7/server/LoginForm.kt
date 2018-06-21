@@ -169,14 +169,14 @@ class LoginForm : Application() {
             selectionModel.selectFirst()
         }
         val sliderX = Slider().apply {
-            min = 0.0
-            max = 1500.0
-            value = 750.0
+            min = -750.0
+            max = 750.0
+            value = 0.0
         }
         val sliderY = Slider().apply {
-            min = 0.0
-            max = 1500.0
-            value = 750.0
+            min = -750.0
+            max = 750.0
+            value = 0.0
         }
         val levelX = Label(sliderX.value.toString())
         val levelY = Label(sliderY.value.toString())
@@ -279,6 +279,7 @@ class LoginForm : Application() {
         table.items = refreshTable()
         addB.onAction = EventHandler {
             val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            print(a.coordinates)
             message = "add ${a.csv()}"
             table.items = refreshTable()
         }
