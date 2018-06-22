@@ -1,7 +1,10 @@
 package ru.ifmo.se.laba7.klient
 
 import javafx.application.Application
+import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Menu
@@ -13,26 +16,40 @@ import javafx.scene.layout.*
 import javafx.scene.shape.Circle
 import javafx.stage.Stage
 import ru.ifmo.se.laba7.server.Astronaut
-import java.awt.Paint
 import java.io.FileInputStream
-import java.util.concurrent.ConcurrentLinkedDeque
 
 class KlientForm : Application() {
+    val astronauts = FXCollections.observableArrayList<Astronaut>()
 
     companion object {
         @Volatile var message = ""
     }
 
-    fun createKlientGUI(): Scene {
-
-        val circles = ArrayList<Astronaut>()
+    fun refresh() {
         val kl = Klient()
-        var response = kl.sendEcho("refresh").split("||")
-        response.map { circles.add(Astronaut.parseCsv(it)) }
 
+        val response = kl.sendEcho("refresh").split("||")
+        val newAstronauts = response.map { Astronaut.parseCsv(it) }
+        val toBeRemoved = astronauts.filter { !newAstronauts.contains(it) }
+        val toBeAdded = newAstronauts.filter { !astronauts.contains(it) }
+        astronauts.removeAll(toBeRemoved)
+        astronauts.addAll(toBeAdded)
+    }
 
+    class AstroCircle(val astronaut: Astronaut): Circle(
+            astronaut.coordinates.x / 3.125 + 450.0,
+            astronaut.coordinates.y / 3.125 + 280.0,
+            10.0)
+
+    fun createKlientGUI(): Scene {
         val klient = AnchorPane()
 
+        astronauts.addListener { c: ListChangeListener.Change<out Astronaut> ->
+            while (c.next()) {
+                klient.children.addAll(c.addedSubList.map { AstroCircle(it) })
+                klient.children.removeIf { it is AstroCircle && c.removed.contains(it.astronaut) }
+            }
+        }
         val selectedImage = ImageView()
         val coordinatePane = Image(FileInputStream("F:\\ITMO\\Programming\\laba7\\klient\\res\\CoordinatePane.png"))
         selectedImage.apply {
@@ -43,6 +60,7 @@ class KlientForm : Application() {
         AnchorPane.setRightAnchor(selectedImage, 10.0)
         AnchorPane.setBottomAnchor(selectedImage, 10.0)
         klient.children.add(selectedImage)
+        refresh()
         print(selectedImage.layoutX)
         print(selectedImage.layoutY)
 
@@ -65,23 +83,8 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(roundButton, 40.0)
         AnchorPane.setLeftAnchor(roundButton, 40.0)
         klient.children.add(roundButton)
-        // Just Example
-//        val circle = Circle().apply {
-//            centerX = 450.0
-//            centerY = 280.0
-//            radius = 10.0
-//        }
-        //Circle()
-        //klient.children.add(circle)
 
-        val astroCircles = ArrayList<Circle>()
-        astroCircles.addAll(circles.map {
-           Circle(it.coordinates.x/3 + 450.0, -it.coordinates.y/3 + 280.0, 10.0)
-        })
-        circles.map{
-            println(it.coordinates.x.toString() + " " + it.coordinates.y.toString())
-        }
-        klient.children.addAll(astroCircles.map { it })
+        roundButton.onAction = EventHandler { refresh() }
 
         return Scene(klient, 700.0, 530.0)
     }
@@ -94,8 +97,5 @@ class KlientForm : Application() {
             isResizable = false
             show()
         }
-//        val klient = Klient()
-//        klient.sendEcho("refresh")
     }
-
 }
