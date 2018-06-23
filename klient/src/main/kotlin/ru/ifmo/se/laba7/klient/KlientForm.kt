@@ -42,7 +42,7 @@ class KlientForm : Application() {
         astronauts.addAll(toBeAdded)
     }
 
-    class AstroCircle(val astronaut: Astronaut): Circle(
+    class AstroCircle(public val astronaut: Astronaut): Circle(
             astronaut.coordinates.x / 3.125 + 450.0,
             astronaut.coordinates.y / 3.125 + 280.0,
             10.0, Colors.colorToFill(astronaut.color))
@@ -78,7 +78,11 @@ class KlientForm : Application() {
         val color = ComboBox<String>(FXCollections.observableArrayList<String>("Any", "Green", "Red", "Blue", "Yellow")).apply {
             selectionModel.selectFirst()
         }
-        val selectionHelperCoord = ComboBox<String>(FXCollections.observableArrayList<String>("_", ">", "<", ">=", "<=")).apply {
+        val selectionHelperCoordX = ComboBox<String>(FXCollections.observableArrayList<String>("_", ">", "<", ">=", "<=")).apply {
+            selectionModel.selectFirst()
+            prefWidth = 60.0
+        }
+        val selectionHelperCoordY = ComboBox<String>(FXCollections.observableArrayList<String>("_", ">", "<", ">=", "<=")).apply {
             selectionModel.selectFirst()
             prefWidth = 60.0
         }
@@ -121,9 +125,13 @@ class KlientForm : Application() {
         AnchorPane.setLeftAnchor(sliderY, 10.0)
         AnchorPane.setBottomAnchor(sliderY, 5.0)
 
-        klient.children.add(selectionHelperCoord)
-        AnchorPane.setBottomAnchor(selectionHelperCoord, 20.0)
-        AnchorPane.setLeftAnchor(selectionHelperCoord, 135.0)
+        klient.children.add(selectionHelperCoordX)
+        AnchorPane.setBottomAnchor(selectionHelperCoordX, 35.0)
+        AnchorPane.setLeftAnchor(selectionHelperCoordX, 135.0)
+
+        klient.children.add(selectionHelperCoordY)
+        AnchorPane.setBottomAnchor(selectionHelperCoordY, 5.0)
+        AnchorPane.setLeftAnchor(selectionHelperCoordY, 135.0)
 
         klient.children.add(levelX)
         AnchorPane.setLeftAnchor(levelX, 35.0)
@@ -167,7 +175,42 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(filters, 155.0)
         AnchorPane.setLeftAnchor(filters, 50.0)
 
-        fun filter(){}
+        fun filter(): List<Node> {
+            var candidates = klient.children.filter { it is AstroCircle }
+            when (selectionHelperCoordX.value) {
+                "_" -> {}
+                ">" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerX - 450.0) * 3.125) > sliderX.value } }
+                "<" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerX - 450.0) * 3.125) < sliderX.value } }
+                ">=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerX - 450.0) * 3.125) >= sliderX.value } }
+                "<=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerX - 450.0) * 3.125) <= sliderX.value } }
+            }
+            when (selectionHelperCoordY.value) {
+                "_" -> {}
+                ">" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) > sliderY.value } }
+                "<" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) < sliderY.value } }
+                ">=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) >= sliderY.value } }
+                "<=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) <= sliderY.value } }
+            }
+            when (selectionHelperName.value) {
+                "_" -> {}
+                ">" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.name > nameField.text } }
+                "<" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.name < nameField.text } }
+                ">=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.name >= nameField.text } }
+                "<=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.name <= nameField.text } }
+            }
+            when (selectionHelperExp.value) {
+                "_" -> {}
+                ">" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex > coolnessIndex.text.toInt() } }
+                "<" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex < coolnessIndex.text.toInt() } }
+                ">=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex >= coolnessIndex.text.toInt() } }
+                "<=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex <= coolnessIndex.text.toInt() } }
+            }
+            when (color.value){
+                "Any" -> {}
+                else -> candidates = candidates.filter { it is AstroCircle && it.astronaut.color == Colors.stringToColor(color.value) }
+            }
+            return candidates
+        }
 
         val menuBar = MenuBar()
         menuBar.prefWidth = 720.0
@@ -179,6 +222,7 @@ class KlientForm : Application() {
         menuBar.menus.addAll(save_load)
 
         val roundButton = Button("\uf2f1")
+        val start = Button("\uf04b")
         val baseCss = "-fx-background-radius: 75em; " +
                 "-fx-min-width: 75px; " +
                 "-fx-min-height: 75px; " +
@@ -190,15 +234,29 @@ class KlientForm : Application() {
                 "-fx-cursor: hand; "
 
         roundButton.style = baseCss
+        start.style = baseCss
         AnchorPane.setTopAnchor(roundButton, 40.0)
-        AnchorPane.setLeftAnchor(roundButton, 20.0)
-        klient.children.add(roundButton)
+        AnchorPane.setLeftAnchor(roundButton, 15.0)
+        AnchorPane.setTopAnchor(start, 40.0)
+        AnchorPane.setLeftAnchor(start, 105.0)
+        klient.children.addAll(roundButton, start)
 
         roundButton.onMousePressed = EventHandler {
             roundButton.style = "$baseCss -fx-background-color: Green; "
         }
         roundButton.onMouseReleased = EventHandler { roundButton.style = baseCss }
+        start.onMousePressed = EventHandler {
+            start.style = "$baseCss -fx-background-color: Green; "
+        }
+        start.onMouseReleased = EventHandler { start.style = baseCss }
         roundButton.onAction = EventHandler { refresh() }
+        start.onAction = EventHandler {
+            val c = filter()
+            c.map {
+                if (it is AstroCircle)
+                    it.fill = Color.WHITE
+            }
+        }
 
         return Scene(klient, 700.0, 530.0)
     }
