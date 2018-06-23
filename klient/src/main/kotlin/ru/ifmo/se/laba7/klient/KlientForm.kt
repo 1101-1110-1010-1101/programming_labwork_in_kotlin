@@ -107,6 +107,163 @@ class KlientForm : Application() {
         val levelX = Label(sliderX.value.toString())
         val levelY = Label(sliderY.value.toString())
 
+        // CMD
+        val userString = TextField().apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        klient.children.add(userString)
+        AnchorPane.setLeftAnchor(userString, 10.0)
+        AnchorPane.setBottomAnchor(userString, 185.0)
+        val panel0 = Label("  You can type smth down here").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel1 = Label("  I`m a little fancy command line").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel2 = Label("  Hello User!").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel3 = Label("  3").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel4 = Label("  4").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel5 = Label("  5").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel6 = Label("  6").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel7 = Label("  7").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel8 = Label("  8").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel9 = Label("  9").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel10 = Label("  10").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel11 = Label("  11").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel12 = Label("  12").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        val panel13 = Label("  13").apply {
+            style = "-fx-background-color: Black; " +
+                    "-fx-text-fill: White"
+            prefWidth = 185.0
+        }
+        AnchorPane.setBottomAnchor(panel0, 205.0)
+        AnchorPane.setBottomAnchor(panel1, 220.0)
+        AnchorPane.setBottomAnchor(panel2, 235.0)
+        AnchorPane.setBottomAnchor(panel3, 250.0)
+        AnchorPane.setBottomAnchor(panel4, 265.0)
+        AnchorPane.setBottomAnchor(panel5, 280.0)
+        AnchorPane.setBottomAnchor(panel6, 295.0)
+        AnchorPane.setBottomAnchor(panel7, 310.0)
+        AnchorPane.setBottomAnchor(panel8, 325.0)
+        AnchorPane.setBottomAnchor(panel9, 340.0)
+        AnchorPane.setBottomAnchor(panel10, 355.0)
+        AnchorPane.setBottomAnchor(panel11, 370.0)
+        AnchorPane.setBottomAnchor(panel12, 385.0)
+        AnchorPane.setBottomAnchor(panel13, 400.0)
+        AnchorPane.setLeftAnchor(panel0, 10.0)
+        AnchorPane.setLeftAnchor(panel1, 10.0)
+        AnchorPane.setLeftAnchor(panel2, 10.0)
+        AnchorPane.setLeftAnchor(panel3, 10.0)
+        AnchorPane.setLeftAnchor(panel4, 10.0)
+        AnchorPane.setLeftAnchor(panel5, 10.0)
+        AnchorPane.setLeftAnchor(panel6, 10.0)
+        AnchorPane.setLeftAnchor(panel7, 10.0)
+        AnchorPane.setLeftAnchor(panel8, 10.0)
+        AnchorPane.setLeftAnchor(panel9, 10.0)
+        AnchorPane.setLeftAnchor(panel10, 10.0)
+        AnchorPane.setLeftAnchor(panel11, 10.0)
+        AnchorPane.setLeftAnchor(panel12, 10.0)
+        AnchorPane.setLeftAnchor(panel13, 10.0)
+        klient.children.addAll(panel0, panel1, panel2, panel3, panel4, panel5, panel6, panel7, panel8, panel9, panel10, panel11, panel12, panel13)
+        //
+        fun writeToCmd(message: String){
+            panel13.text = panel12.text
+            panel12.text = panel11.text
+            panel11.text = panel10.text
+            panel10.text = panel9.text
+            panel9.text = panel8.text
+            panel8.text = panel7.text
+            panel7.text = panel6.text
+            panel6.text = panel5.text
+            panel5.text = panel4.text
+            panel4.text = panel3.text
+            panel3.text = panel2.text
+            panel2.text = panel1.text
+            panel1.text = panel0.text
+            panel0.text = "  " + message
+            userString.text = ""
+        }
+        fun clear(){
+            panel0.text = ""
+            panel1.text = ""
+            panel2.text = ""
+            panel3.text = ""
+            panel4.text = ""
+            panel5.text = ""
+            panel6.text = ""
+            panel7.text = ""
+            panel8.text = ""
+            panel9.text = ""
+            panel10.text = ""
+            panel11.text = ""
+            panel12.text = ""
+            panel13.text = ""
+        }
+        fun interpreteCommand(command: String){
+            when (command){
+                "Hello OR_ASS" -> writeToCmd("Hello User!")
+                "clear" -> clear()
+            }
+        }
+
+        userString.onAction = EventHandler {
+            val message = userString.text
+            writeToCmd(message)
+            interpreteCommand(message)
+        }
+
+
+
         klient.children.add(x)
         AnchorPane.setLeftAnchor(x, 10.0)
         AnchorPane.setBottomAnchor(x, 50.0)
