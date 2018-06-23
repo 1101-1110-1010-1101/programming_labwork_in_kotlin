@@ -14,7 +14,7 @@ public class Bridge {
     private byte[] buf = new byte[64000];
 
     public Bridge() throws SocketException {
-        socket = new DatagramSocket(4445);
+        socket = new DatagramSocket(15000);
     }
 
     public void run() throws IOException, InterruptedException {

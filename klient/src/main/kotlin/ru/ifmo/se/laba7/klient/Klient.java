@@ -17,7 +17,7 @@ public class Klient {
     public String sendEcho(String msg) throws IOException {
         buf = msg.getBytes();
         DatagramPacket packet
-                = new DatagramPacket(buf, buf.length, address, 4445);
+                = new DatagramPacket(buf, buf.length, address, 15000);
         socket.send(packet);
         buf = new byte[64000];
         packet = new DatagramPacket(buf, buf.length);
