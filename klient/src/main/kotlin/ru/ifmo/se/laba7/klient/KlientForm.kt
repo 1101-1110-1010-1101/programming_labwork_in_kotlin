@@ -1,10 +1,8 @@
 package ru.ifmo.se.laba7.klient
 
-import javafx.animation.FillTransition
 import javafx.application.Application
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
-import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.Scene
@@ -16,12 +14,12 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.text.Font
 import javafx.stage.Stage
-import javafx.util.Duration
 import ru.ifmo.se.laba7.server.Astronaut
 import ru.ifmo.se.laba7.server.Colors
-import java.io.FileInputStream
+import java.net.SocketTimeoutException
 
 class KlientForm : Application() {
+    var anima = false
     fun getResource(path: String) = javaClass.classLoader.getResource(path).openStream()
 
     init {
@@ -30,20 +28,7 @@ class KlientForm : Application() {
     }
     val astronauts = FXCollections.observableArrayList<Astronaut>()
 
-    companion object {
-        @Volatile var message = ""
-        @Volatile var anima = false
-    }
 
-    fun refresh() {
-        val kl = Klient()
-        val response = kl.sendEcho("refresh").split("||")
-        val newAstronauts = response.map { Astronaut.parseCsv(it) }
-        val toBeRemoved = astronauts.filter { !newAstronauts.contains(it) }
-        val toBeAdded = newAstronauts.filter { !astronauts.contains(it) }
-        astronauts.removeAll(toBeRemoved)
-        astronauts.addAll(toBeAdded)
-    }
 
     class AstroCircle(public val astronaut: Astronaut): Circle(
             astronaut.coordinates.x / 3.125 + 450.0,
@@ -69,7 +54,7 @@ class KlientForm : Application() {
         AnchorPane.setRightAnchor(selectedImage, 10.0)
         AnchorPane.setBottomAnchor(selectedImage, 10.0)
         klient.children.add(selectedImage)
-        refresh()
+
 
         val mainFont = Font("Courier New", 16.0)
         val filters = Label("Filters")
@@ -134,57 +119,57 @@ class KlientForm : Application() {
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel3 = Label("  3").apply {
+        val panel3 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel4 = Label("  4").apply {
+        val panel4 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel5 = Label("  5").apply {
+        val panel5 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel6 = Label("  6").apply {
+        val panel6 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel7 = Label("  7").apply {
+        val panel7 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel8 = Label("  8").apply {
+        val panel8 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel9 = Label("  9").apply {
+        val panel9 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel10 = Label("  10").apply {
+        val panel10 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel11 = Label("  11").apply {
+        val panel11 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel12 = Label("  12").apply {
+        val panel12 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel13 = Label("  13").apply {
+        val panel13 = Label("  .").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
@@ -333,10 +318,10 @@ class KlientForm : Application() {
             }
             when (selectionHelperCoordY.value) {
                 "_" -> {}
-                ">" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) > sliderY.value } }
-                "<" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) < sliderY.value } }
-                ">=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) >= sliderY.value } }
-                "<=" -> { candidates = candidates.filter { it is AstroCircle && ((it.centerY - 280.0) * 3.125) <= sliderY.value } }
+                ">" -> { candidates = candidates.filter { it is AstroCircle && (-(it.centerY - 280.0) * 3.125) > sliderY.value } }
+                "<" -> { candidates = candidates.filter { it is AstroCircle && (-(it.centerY - 280.0) * 3.125) < sliderY.value } }
+                ">=" -> { candidates = candidates.filter { it is AstroCircle && (-(it.centerY - 280.0) * 3.125) >= sliderY.value } }
+                "<=" -> { candidates = candidates.filter { it is AstroCircle && (-(it.centerY - 280.0) * 3.125) <= sliderY.value } }
             }
             when (selectionHelperName.value) {
                 "_" -> {}
@@ -358,9 +343,25 @@ class KlientForm : Application() {
             }
             return candidates
         }
+        fun refresh() {
+            writeToCmd("Getting collection from server...")
+            try {
 
-
-
+                val kl = Klient()
+                val response = kl.sendEcho("refresh").split("||")
+                val newAstronauts = response.map { Astronaut.parseCsv(it) }
+                val toBeRemoved = astronauts.filter { !newAstronauts.contains(it) }
+                val toBeAdded = newAstronauts.filter { !astronauts.contains(it) }
+                astronauts.removeAll(toBeRemoved)
+                astronauts.addAll(toBeAdded)
+                writeToCmd("Successfully.")
+            } catch (s: SocketTimeoutException){
+                writeToCmd("Sorry, server isn`t responding now")
+                writeToCmd("Please, try again later")
+            }
+        }
+        writeToCmd(".")
+        refresh()
         val menuBar = MenuBar()
         menuBar.prefWidth = 720.0
         klient.children.add(menuBar)
@@ -397,13 +398,54 @@ class KlientForm : Application() {
         start.onMousePressed = EventHandler {
             start.style = "$baseCss -fx-background-color: Green; "
         }
+        val animationUnits = ArrayList<ColorChanging>()
+        fun startAnimation(){
+            start.text = "\uf04d"
+            anima = true
+            val c = filter()
+            writeToCmd("********************")
+            writeToCmd("Animation Started")
+            writeToCmd("Filter values:")
+            if (selectionHelperName.value.equals("_"))
+                writeToCmd("Name: Any")
+            else
+                writeToCmd("Name ${selectionHelperName.value} ${nameField.text}")
+            writeToCmd("Color: ${color.value}")
+            if (selectionHelperExp.value.equals("_"))
+                writeToCmd("Experience: Any")
+            else
+                writeToCmd("Experience ${selectionHelperExp.value} ${coolnessIndex.text}")
+            if (selectionHelperCoordX.value.equals("_"))
+                writeToCmd("x-coordinate: Any")
+            else writeToCmd("x-coordinate ${selectionHelperCoordX.value} ${levelX.text}")
+            if (selectionHelperCoordY.value.equals("_"))
+                writeToCmd("y-coordinate: Any")
+            else writeToCmd("y-coordinate ${selectionHelperCoordY.value} ${levelY.text}")
+            writeToCmd("Conditions were satisfied by:")
+            writeToCmd("${c.size} astronauts")
+            writeToCmd("********************")
+            c.map {
+                if (it is AstroCircle) {
+                    val unit = ColorChanging(it, Color.BLACK)
+                    animationUnits.add(unit)
+                    unit.start()
+                }
+            }
+        }
+        fun stopAnimation(){
+            start.text = "\uF04B"
+            animationUnits.forEach { it.stop() }
+            animationUnits.clear()
+            anima = false
+            writeToCmd("Animation stoped.")
+        }
         fun interpreteCommand(command: String){
             when (command){
                 "Hello OR_ASS" -> writeToCmd("Hello User!")
                 "clear" -> clear()
                 "refresh" -> refresh()
-                "start" -> {}
-                "stop" -> {}
+                "start" -> startAnimation()
+                "stop" -> stopAnimation()
                 }
         }
 
@@ -412,32 +454,15 @@ class KlientForm : Application() {
             writeToCmd(message)
             interpreteCommand(message)
         }
-        val colorThreads = ArrayList<ColorChanging>()
+
         start.onMouseReleased = EventHandler { start.style = baseCss }
         roundButton.onAction = EventHandler { refresh() }
         start.onAction = EventHandler {
             when (anima) {
-                false -> {
-                    start.text = "\uf04d"
-                    anima = true
-                    val c = filter()
-                    c.map {
-                        if (it is AstroCircle) {
-                            val thread = ColorChanging(it, Color.BLACK)
-                            colorThreads.add(thread)
-                            thread.start()
-                        }
-                    }
-                }
-                true -> {
-                    start.text = "\uF04B"
-                    colorThreads.map { it.interrupt() }
-                    colorThreads.clear()
-                    anima = false
-                }
+                false -> startAnimation()
+                true -> stopAnimation()
             }
         }
-
         return Scene(klient, 700.0, 530.0)
     }
 

@@ -14,7 +14,8 @@ public class Klient {
         address = InetAddress.getByName("localhost");
     }
 
-    public String sendEcho(String msg) throws IOException {
+    public String sendEcho(String msg) throws IOException, SocketTimeoutException {
+        socket.setSoTimeout(6000);
         buf = msg.getBytes();
         DatagramPacket packet
                 = new DatagramPacket(buf, buf.length, address, 15000);
