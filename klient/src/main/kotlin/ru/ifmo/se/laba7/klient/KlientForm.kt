@@ -1,8 +1,10 @@
 package ru.ifmo.se.laba7.klient
 
+import javafx.animation.FillTransition
 import javafx.application.Application
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
+import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.Scene
@@ -14,6 +16,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.text.Font
 import javafx.stage.Stage
+import javafx.util.Duration
 import ru.ifmo.se.laba7.server.Astronaut
 import ru.ifmo.se.laba7.server.Colors
 import java.io.FileInputStream
@@ -29,11 +32,11 @@ class KlientForm : Application() {
 
     companion object {
         @Volatile var message = ""
+        @Volatile var anima = false
     }
 
     fun refresh() {
         val kl = Klient()
-
         val response = kl.sendEcho("refresh").split("||")
         val newAstronauts = response.map { Astronaut.parseCsv(it) }
         val toBeRemoved = astronauts.filter { !newAstronauts.contains(it) }
@@ -249,19 +252,6 @@ class KlientForm : Application() {
             panel12.text = ""
             panel13.text = ""
         }
-        fun interpreteCommand(command: String){
-            when (command){
-                "Hello OR_ASS" -> writeToCmd("Hello User!")
-                "clear" -> clear()
-            }
-        }
-
-        userString.onAction = EventHandler {
-            val message = userString.text
-            writeToCmd(message)
-            interpreteCommand(message)
-        }
-
 
 
         klient.children.add(x)
@@ -369,6 +359,8 @@ class KlientForm : Application() {
             return candidates
         }
 
+
+
         val menuBar = MenuBar()
         menuBar.prefWidth = 720.0
         klient.children.add(menuBar)
@@ -405,13 +397,44 @@ class KlientForm : Application() {
         start.onMousePressed = EventHandler {
             start.style = "$baseCss -fx-background-color: Green; "
         }
+        fun interpreteCommand(command: String){
+            when (command){
+                "Hello OR_ASS" -> writeToCmd("Hello User!")
+                "clear" -> clear()
+                "refresh" -> refresh()
+                "start" -> {}
+                "stop" -> {}
+                }
+        }
+
+        userString.onAction = EventHandler {
+            val message = userString.text
+            writeToCmd(message)
+            interpreteCommand(message)
+        }
+        val colorThreads = ArrayList<ColorChanging>()
         start.onMouseReleased = EventHandler { start.style = baseCss }
         roundButton.onAction = EventHandler { refresh() }
         start.onAction = EventHandler {
-            val c = filter()
-            c.map {
-                if (it is AstroCircle)
-                    it.fill = Color.WHITE
+            when (anima) {
+                false -> {
+                    start.text = "\uf04d"
+                    anima = true
+                    val c = filter()
+                    c.map {
+                        if (it is AstroCircle) {
+                            val thread = ColorChanging(it, Color.BLACK)
+                            colorThreads.add(thread)
+                            thread.start()
+                        }
+                    }
+                }
+                true -> {
+                    start.text = "\uF04B"
+                    colorThreads.map { it.interrupt() }
+                    colorThreads.clear()
+                    anima = false
+                }
             }
         }
 
