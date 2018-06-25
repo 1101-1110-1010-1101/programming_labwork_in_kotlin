@@ -19,6 +19,7 @@ import ru.ifmo.se.laba7.server.Astronaut
 import ru.ifmo.se.laba7.server.Colors
 import ru.ifmo.se.laba7.server.LocalesManager
 import java.net.SocketTimeoutException
+import java.util.*
 
 class KlientForm : Application() {
     var anima = false
@@ -61,7 +62,9 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(selectedImage, 10.0)
         klient.children.add(selectedImage)
 
-        val freq = 4000.0
+        val set = Regex("set .*")
+        var freq = 4000.0
+        var anim_color = Color.BLACK
         val mainFont = Font("Courier New", 16.0)
         val filters = Label().apply { textProperty().bind(LocalesManager.getLocalizedBinding("FILTERS")) }
         filters.font = Font("Courier New", 24.0)
@@ -71,7 +74,7 @@ class KlientForm : Application() {
         val coolnessIndex = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("EXP")) }
         val color = ComboBox<Rectangle>(FXCollections.observableArrayList<Rectangle>(
                 Rectangle(10.0, 10.0, Color.WHITE),
-                Rectangle(10.0, 10.0, Color.GREEN),
+                Rectangle(10.0, 10.0, Color.LIGHTGREEN),
                 Rectangle(10.0, 10.0, Color.RED),
                 Rectangle(10.0, 10.0, Color.BLUE),
                 Rectangle(10.0, 10.0, Color.YELLOW)
@@ -79,7 +82,7 @@ class KlientForm : Application() {
             selectionModel.selectFirst()
             onAction = EventHandler {
                 items[0] = Rectangle(10.0, 10.0, Color.WHITE)
-                items[1] = Rectangle(10.0, 10.0, Color.GREEN)
+                items[1] = Rectangle(10.0, 10.0, Color.LIGHTGREEN)
                 items[2] = Rectangle(10.0, 10.0, Color.RED)
                 items[3] = Rectangle(10.0, 10.0, Color.BLUE)
                 items[4] = Rectangle(10.0, 10.0, Color.YELLOW)
@@ -335,7 +338,6 @@ class KlientForm : Application() {
         klient.children.add(filters)
         AnchorPane.setBottomAnchor(filters, 155.0)
         AnchorPane.setLeftAnchor(filters, 50.0)
-
         fun filter(): List<Node> {
             var candidates = klient.children.filter { it is AstroCircle }
             when (selectionHelperCoordX.value) {
@@ -394,11 +396,11 @@ class KlientForm : Application() {
         val menuBar = MenuBar()
         menuBar.prefWidth = 720.0
         klient.children.add(menuBar)
-        val save_load = Menu("File")
-        val saveM = MenuItem("Save")
-        val loadM = MenuItem("Load")
-        save_load.items.addAll(saveM, loadM)
-        menuBar.menus.addAll(save_load)
+        val lang = Menu("Language")
+        val eng = MenuItem("English").apply { onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("en", "US")) } }
+        val rus = MenuItem("Русский").apply { onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("ru", "RU")) } }
+        lang.items.addAll(eng, rus)
+        menuBar.menus.addAll(lang)
 
         val roundButton = Button("\uf2f1")
         val start = Button("\uf04b")
@@ -467,7 +469,7 @@ class KlientForm : Application() {
             writeToCmd("********************")
             c.map {
                 if (it is AstroCircle) {
-                    val unit = ColorChanging(it, Color.BLACK, freq)
+                    val unit = ColorChanging(it, anim_color, freq)
                     animationUnits.add(unit)
                     unit.start()
                 }
@@ -476,6 +478,84 @@ class KlientForm : Application() {
                 stopAnimation()
             }
         }
+        fun setResolver(com: String){
+            println("Here it is")
+            val args = com.split(" ")
+            when (args[1]) {
+                "freq" -> {
+                    try {
+                        freq = args[3].toDouble() * 1000
+                        writeToCmd("freq = $freq")
+                    } catch (n: NumberFormatException) { writeToCmd("${args[3]} is not a number") }
+                }
+                "anim_color" -> {
+                    try {
+                        anim_color = Color.valueOf(args[3])
+                        writeToCmd("anim_color = ${args[3]}")
+                    } catch (i: IllegalArgumentException) { writeToCmd("${args[3]}: unknown color") }
+                }
+                "name" -> {
+                    try {
+                        if (args[2].equals("_")) {
+                            selectionHelperName.value = "_"
+                            return
+                        }
+                        nameField.text = args[3]
+                        if (!(args[2] in selectionHelperName.items))
+                            throw IllegalArgumentException()
+                        else selectionHelperName.value = args[2]
+                    } catch (i: IllegalArgumentException) { writeToCmd("${args[2]}: unknown operator") }
+                }
+                "exp" -> {
+                    try {
+                        if (args[2].equals("_")) {
+                            selectionHelperExp.value = "_"
+                            return
+                        }
+                        coolnessIndex.text = args[3]
+                        if (!(args[2] in selectionHelperExp.items))
+                            throw IllegalArgumentException()
+                        else selectionHelperExp.value = args[2]
+                    } catch (i: IllegalArgumentException) { writeToCmd("${args[2]}: unknown operator") }
+                }
+                "x" -> {
+                    try {
+                        if (args[2].equals("_")) {
+                            selectionHelperCoordX.value = "_"
+                            return
+                        }
+                        sliderX.value = args[3].toDouble()
+                        if (!(args[2] in selectionHelperCoordX.items))
+                            throw IllegalArgumentException()
+                        else selectionHelperCoordX.value = args[2]
+                    } catch (i: IllegalArgumentException) { writeToCmd("Pattern: set x operator number") }
+                }
+                "y" -> {
+                    try {
+                        if (args[2].equals("_")) {
+                            selectionHelperCoordY.value = "_"
+                            return
+                        }
+                        sliderY.value = args[3].toDouble()
+                        if (!(args[2] in selectionHelperCoordY.items))
+                            throw IllegalArgumentException()
+                        else selectionHelperCoordY.value = args[2]
+                    } catch (i: IllegalArgumentException) { writeToCmd("Pattern: set y operator number") }
+                }
+                "color" -> {
+                    try {
+                        if (args[2].equals("_")) {
+                            color.value = color.items[0]
+                            return
+                        }
+                        if (!(args[3] in arrayOf("Green", "Red", "Blue", "Yellow")))
+                            throw IllegalArgumentException()
+                        else color.value = Rectangle(10.0, 10.0, Colors.colorToFill(Colors.stringToColor(args[3])))
+                    } catch (i: IllegalArgumentException) { writeToCmd("${args[3]}: unknown color") }
+                }
+            }
+        }
+
         fun interpreteCommand(command: String){
             when (command){
                 "Hello OR_ASS" -> writeToCmd("Hello User!")
@@ -483,6 +563,10 @@ class KlientForm : Application() {
                 "refresh" -> refresh()
                 "start" -> startAnimation()
                 "stop" -> stopAnimation()
+                else -> {
+                    if (set.matches(command))
+                        setResolver(command)
+                    }
                 }
         }
 

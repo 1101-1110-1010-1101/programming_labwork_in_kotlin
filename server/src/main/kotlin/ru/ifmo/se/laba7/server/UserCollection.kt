@@ -20,11 +20,13 @@ class UserCollection : ConcurrentLinkedDeque<Astronaut>() {
                 "\n*** Team list ***\n" + it + "\n*** End of Team list ***"
     }
 
+    @Throws(NullPointerException::class)
     fun remove_first() {
         println("${this.max()?.name} is removed from the team")
         this.remove(max())
     }
 
+    @Throws(NullPointerException::class)
     fun remove_last() {
         println("${this.min()?.name} is removed from the team")
         this.remove(min())

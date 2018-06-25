@@ -18,12 +18,12 @@ enum class Colors {
         fun colorToFill(c: Colors) = when (c.toString()) {
             "Red" -> Color.RED
             "Blue" -> Color.BLUE
-            "Green" -> Color.GREEN
+            "Green" -> Color.LIGHTGREEN
             "Yellow" -> Color.YELLOW
             else -> Color.GREEN
         }
         fun fillToColors(f: Paint) = when (f) {
-            Color.GREEN -> Green
+            Color.LIGHTGREEN -> Green
             Color.YELLOW -> Yellow
             Color.BLUE -> Blue
             Color.RED -> Red

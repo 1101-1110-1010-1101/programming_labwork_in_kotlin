@@ -3,6 +3,7 @@ package ru.ifmo.se.laba7.server
 import javafx.application.Application
 import kotlinx.coroutines.experimental.*
 
+@Throws(NullPointerException::class)
 fun main(args: Array<String>) {
 
     val bridge = Bridge()

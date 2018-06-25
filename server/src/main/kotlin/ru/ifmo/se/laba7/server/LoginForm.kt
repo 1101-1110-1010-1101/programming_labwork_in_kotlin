@@ -12,6 +12,7 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.stage.Stage
 import java.io.*
@@ -155,6 +156,20 @@ class LoginForm : Application() {
     }
 
     fun createServerForm(): Scene{
+        val expException = Alert(Alert.AlertType.WARNING).apply {
+            title = "Not Valid Input"
+            headerText = "Experience must be a number"
+            contentText = "Reassign Experience as a number and try again"
+        }
+        val emptyException = Alert(Alert.AlertType.WARNING).apply {
+            title = "Not Valid Input"
+            headerText = "One of the fields (name or experience) are empy"
+            contentText = "Add a value to it and try again"
+        }
+        val colIsEmpty = Alert(Alert.AlertType.INFORMATION).apply {
+            title = "Information"
+            headerText = "Collection is empty"
+        }
         val mainFont = Font("Courier New", 16.0)
         val x = Label("x:").apply { font = mainFont }
         val y = Label("y:").apply { font = mainFont }
@@ -167,13 +182,19 @@ class LoginForm : Application() {
             prefWidth = 150.0}
         val coolnessIndex = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("EXP"))
             prefWidth = 150.0}
-        val color = ComboBox<String>(FXCollections.observableArrayList<String>(
-                "Green",
-                "Red",
-                "Blue",
-                "Yellow"
+        val color = ComboBox<Rectangle>(FXCollections.observableArrayList<Rectangle>(
+                Rectangle(120.0, 10.0, Color.GREEN),
+                Rectangle(120.0, 10.0, Color.RED),
+                Rectangle(120.0, 10.0, Color.BLUE),
+                Rectangle(120.0, 10.0, Color.YELLOW)
         )).apply {
             selectionModel.selectFirst()
+            onAction = EventHandler {
+                items[0] = Rectangle(120.0, 10.0, Color.GREEN)
+                items[1] = Rectangle(120.0, 10.0, Color.RED)
+                items[2] = Rectangle(120.0, 10.0, Color.BLUE)
+                items[3] = Rectangle(120.0, 10.0, Color.YELLOW)
+            }
             prefWidth = 150.0
         }
         val sliderX = Slider().apply {
@@ -262,6 +283,13 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(first, 10.0)
         AnchorPane.setLeftAnchor(last, 10.0)
 
+        fun checkFields(){
+            if (nameField.text.equals("") || coolnessIndex.text.equals(""))
+                throw EmptyFieldException()
+        }
+
+
+
         val columnName = TableColumn<Astronaut, String>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("NAME")) }
         columnName.cellValueFactory = PropertyValueFactory<Astronaut, String>("name")
         columnName.isResizable = false
@@ -274,8 +302,8 @@ class LoginForm : Application() {
         columnClns.cellValueFactory = PropertyValueFactory<Astronaut, Int>("coolnessIndex")
         columnClns.prefWidth = 90.0
         columnClns.isResizable = false
-        val columnColor = TableColumn<Astronaut, Colors>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("COL")) }
-        columnColor.cellValueFactory = PropertyValueFactory<Astronaut, Colors>("color")
+        val columnColor = TableColumn<Astronaut, String>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("COL")) }
+        columnColor.cellValueFactory = PropertyValueFactory<Astronaut, String>("color")
         columnColor.prefWidth = 65.0
         val columnDate = TableColumn<Astronaut, LocalDate>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("DATE")) }
         columnDate.prefWidth = Control.USE_COMPUTED_SIZE
@@ -290,31 +318,46 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(table, 170.0)
         AnchorPane.setTopAnchor(table, 30.0)
         table.items = refreshTable()
+
         addB.onAction = EventHandler {
-            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
-            print(a.coordinates)
-            message = "add ${a.csv()}"
-            table.items = refreshTable()
+            try {
+                checkFields()
+                val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.fillToColors(color.value.fill))
+                message = "add ${a.csv()}"
+                table.items = refreshTable() } catch (n: NumberFormatException) { expException.showAndWait() }
+            catch (e: EmptyFieldException) { emptyException.showAndWait() }
         }
 
         addIfMax.onAction = EventHandler {
-            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            try {
+            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.fillToColors(color.value.fill))
             message = "add_if_max ${a.csv()}"
-            table.items = refreshTable()
+            table.items = refreshTable() } catch (n: NumberFormatException) { expException.showAndWait() }
+            catch (e: EmptyFieldException) { emptyException.showAndWait() }
         }
 
         removeGreater.onAction = EventHandler {
-            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.stringToColor(color.value))
+            try {
+            val a = Astronaut(nameField.text, Astronaut.Coordinates(sliderX.value, sliderY.value), coolnessIndex.text.toInt(), Colors.fillToColors(color.value.fill))
             message = "remove_if_greater ${a.csv()}"
-            table.items = refreshTable()
+            table.items = refreshTable() } catch (n: NumberFormatException) { expException.showAndWait() }
+            catch (e: EmptyFieldException) { emptyException.showAndWait() }
         }
 
-        first.onAction = EventHandler { message = "remove_first ok?"
-            table.items = refreshTable()
+        first.onAction = EventHandler {
+            try {
+                if (table.items.size == 0)
+                    throw NullPointerException()
+                message = "remove_first ok?"
+                table.items = refreshTable() } catch (n: NullPointerException) { colIsEmpty.showAndWait() }
         }
 
-        last.onAction = EventHandler { message = "remove_last ok?"
-            table.items = refreshTable()
+        last.onAction = EventHandler {
+            try {
+                if (table.items.size == 0)
+                    throw NullPointerException()
+                message = "remove_last ok?"
+                table.items = refreshTable() } catch (n: NullPointerException) { colIsEmpty.showAndWait() }
         }
 
 
@@ -339,6 +382,7 @@ class LoginForm : Application() {
 
         return Scene(server, 580.0, 335.0)
     }
+
 
     override fun start(primaryStage: Stage) {
         primaryStage.apply {
