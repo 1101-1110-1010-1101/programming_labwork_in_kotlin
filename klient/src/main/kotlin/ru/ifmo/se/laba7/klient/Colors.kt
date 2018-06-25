@@ -1,9 +1,10 @@
 package ru.ifmo.se.laba7.server
 
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 
 enum class Colors {
-    Red, Blue, Green, Yellow;
+    Red, Blue, Green, Yellow, Any;
     companion object {
         fun stringToColor(s: String): Colors {
             when (s) {
@@ -20,6 +21,13 @@ enum class Colors {
             "Green" -> Color.GREEN
             "Yellow" -> Color.YELLOW
             else -> Color.GREEN
+        }
+        fun fillToColors(f: Paint) = when (f) {
+            Color.GREEN -> Green
+            Color.YELLOW -> Yellow
+            Color.BLUE -> Blue
+            Color.RED -> Red
+            else -> Any
         }
     }
 }

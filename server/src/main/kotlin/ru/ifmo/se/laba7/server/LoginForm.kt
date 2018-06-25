@@ -16,6 +16,7 @@ import javafx.scene.text.Font
 import javafx.stage.Stage
 import java.io.*
 import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.Exchanger
 
 class LoginForm : Application() {
@@ -157,26 +158,35 @@ class LoginForm : Application() {
         val mainFont = Font("Courier New", 16.0)
         val x = Label("x:").apply { font = mainFont }
         val y = Label("y:").apply { font = mainFont }
-        val remove = Label("Remove:").apply { font = mainFont }
-        val first = Button("First")
-        val last = Button("Last")
-        val addB = Button("Add")
-        val addIfMax = Button("Add If Max")
-        val removeGreater = Button("Remove Greater")
-        val nameField = TextField().apply { promptText = "Name" }
-        val coolnessIndex = TextField().apply { promptText = "Experience" }
-        val color = ComboBox<String>(FXCollections.observableArrayList<String>("Green", "Red", "Blue", "Yellow")).apply {
+        val first = Button().apply { textProperty().bind(LocalesManager.getLocalizedBinding("FIRST")) }
+        val last = Button().apply { textProperty().bind(LocalesManager.getLocalizedBinding("LAST")) }
+        val addB = Button().apply { textProperty().bind(LocalesManager.getLocalizedBinding("ADD")) }
+        val addIfMax = Button().apply { textProperty().bind(LocalesManager.getLocalizedBinding("ADDMAX")) }
+        val removeGreater = Button().apply { textProperty().bind(LocalesManager.getLocalizedBinding("REMOVEGREAT")) }
+        val nameField = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("NAME"))
+            prefWidth = 150.0}
+        val coolnessIndex = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("EXP"))
+            prefWidth = 150.0}
+        val color = ComboBox<String>(FXCollections.observableArrayList<String>(
+                "Green",
+                "Red",
+                "Blue",
+                "Yellow"
+        )).apply {
             selectionModel.selectFirst()
+            prefWidth = 150.0
         }
         val sliderX = Slider().apply {
             min = -750.0
             max = 750.0
             value = 0.0
+            prefWidth = 150.0
         }
         val sliderY = Slider().apply {
             min = -750.0
             max = 750.0
             value = 0.0
+            prefWidth = 150.0
         }
         val levelX = Label(sliderX.value.toString())
         val levelY = Label(sliderY.value.toString())
@@ -226,53 +236,56 @@ class LoginForm : Application() {
         AnchorPane.setLeftAnchor(color, 10.0)
         AnchorPane.setBottomAnchor(color, 130.0)
 
+        addB.prefWidth = 150.0
         server.children.add(addB)
-        AnchorPane.setBottomAnchor(addB, 160.0)
+        AnchorPane.setBottomAnchor(addB, 190.0)
         AnchorPane.setLeftAnchor(addB, 10.0)
 
+        addIfMax.prefWidth = 150.0
         server.children.add(addIfMax)
         AnchorPane.setBottomAnchor(addIfMax, 160.0)
-        AnchorPane.setLeftAnchor(addIfMax, 50.0)
+        AnchorPane.setLeftAnchor(addIfMax, 10.0)
 
+        removeGreater.prefWidth = 150.0
         server.children.add(removeGreater)
         AnchorPane.setLeftAnchor(removeGreater, 10.0)
-        AnchorPane.setBottomAnchor(removeGreater, 190.0)
+        AnchorPane.setBottomAnchor(removeGreater, 220.0)
 
+        first.prefWidth = 150.0
+        last.prefWidth = 150.0
         server.children.apply {
             add(first)
             add(last)
-            add(remove)
         }
-        AnchorPane.setBottomAnchor(first, 220.0)
-        AnchorPane.setBottomAnchor(last, 220.0)
-        AnchorPane.setBottomAnchor(remove, 243.0)
+        AnchorPane.setBottomAnchor(first, 280.0)
+        AnchorPane.setBottomAnchor(last, 250.0)
         AnchorPane.setLeftAnchor(first, 10.0)
-        AnchorPane.setLeftAnchor(last, 52.0)
-        AnchorPane.setLeftAnchor(remove, 10.0)
+        AnchorPane.setLeftAnchor(last, 10.0)
 
-        val columnName = TableColumn<Astronaut, String>("Name")
+        val columnName = TableColumn<Astronaut, String>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("NAME")) }
         columnName.cellValueFactory = PropertyValueFactory<Astronaut, String>("name")
         columnName.isResizable = false
         columnName.prefWidth = 65.0
-        val columnX = TableColumn<Astronaut, String>("Coordinates")
+        val columnX = TableColumn<Astronaut, String>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("COORS")) }
         columnX.cellValueFactory = PropertyValueFactory<Astronaut, String>("printCoors")
         columnX.prefWidth = 100.0
         columnX.isResizable = false
-        val columnClns = TableColumn<Astronaut, Int>("Experience")
+        val columnClns = TableColumn<Astronaut, Int>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("EXP")) }
         columnClns.cellValueFactory = PropertyValueFactory<Astronaut, Int>("coolnessIndex")
         columnClns.prefWidth = 90.0
         columnClns.isResizable = false
-        val columnColor = TableColumn<Astronaut, Colors>("Color")
+        val columnColor = TableColumn<Astronaut, Colors>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("COL")) }
         columnColor.cellValueFactory = PropertyValueFactory<Astronaut, Colors>("color")
         columnColor.prefWidth = 65.0
-        val columnDate = TableColumn<Astronaut, LocalDate>("Init Date")
+        val columnDate = TableColumn<Astronaut, LocalDate>().apply { textProperty().bind(LocalesManager.getLocalizedBinding("DATE")) }
+        columnDate.prefWidth = Control.USE_COMPUTED_SIZE
         columnDate.cellValueFactory = PropertyValueFactory<Astronaut, LocalDate>("initDate")
         columnDate.prefWidth = 75.0
         val table = TableView<Astronaut>()
         table.isEditable = true
         table.columns.addAll(columnName, columnX, columnClns, columnColor, columnDate)
         server.children.add(table)
-        table.prefHeight = 260.0
+        table.prefHeight = 295.0
         table.prefWidth = 397.0
         AnchorPane.setLeftAnchor(table, 170.0)
         AnchorPane.setTopAnchor(table, 30.0)
@@ -307,18 +320,24 @@ class LoginForm : Application() {
 
         val menuBar = MenuBar()
         menuBar.prefWidth = 580.0
-        val save_load = Menu("File")
-        val saveM = MenuItem("Save")
+        val save_load = Menu().apply { textProperty().bind(LocalesManager.getLocalizedBinding("FILE")) }
+        val saveM = MenuItem().apply { textProperty().bind(LocalesManager.getLocalizedBinding("SAVE")) }
         saveM.onAction = EventHandler { message = "save ok?" }
-        val loadM = MenuItem("Load")
+        val loadM = MenuItem().apply { textProperty().bind(LocalesManager.getLocalizedBinding("LOAD")) }
         loadM.onAction = EventHandler { message = "load ok?"
             table.items = refreshTable()
         }
+        val lang = Menu().apply { textProperty().bind(LocalesManager.getLocalizedBinding("LANG")) }
+        val rus = MenuItem("Русский")
+        val eng = MenuItem("English")
+        lang.items.addAll(rus, eng)
+        rus.onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("ru", "RU")) }
+        eng.onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("en", "US")) }
         save_load.items.addAll(saveM, loadM)
-        menuBar.menus.addAll(save_load)
+        menuBar.menus.addAll(save_load, lang)
         server.children.add(menuBar)
 
-        return Scene(server, 580.0, 300.0)
+        return Scene(server, 580.0, 335.0)
     }
 
     override fun start(primaryStage: Stage) {

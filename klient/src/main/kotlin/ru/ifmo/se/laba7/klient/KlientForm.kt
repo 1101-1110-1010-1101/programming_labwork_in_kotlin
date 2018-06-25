@@ -12,10 +12,12 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
+import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.stage.Stage
 import ru.ifmo.se.laba7.server.Astronaut
 import ru.ifmo.se.laba7.server.Colors
+import ru.ifmo.se.laba7.server.LocalesManager
 import java.net.SocketTimeoutException
 
 class KlientForm : Application() {
@@ -33,7 +35,11 @@ class KlientForm : Application() {
     class AstroCircle(public val astronaut: Astronaut): Circle(
             astronaut.coordinates.x / 3.125 + 450.0,
             astronaut.coordinates.y / 3.125 + 280.0,
-            10.0, Colors.colorToFill(astronaut.color))
+            10.0, Colors.colorToFill(astronaut.color)) {
+        init {
+            Tooltip.install(this, Tooltip(astronaut.name))
+        }
+    }
 
     fun createKlientGUI(): Scene {
         val klient = AnchorPane()
@@ -55,16 +61,30 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(selectedImage, 10.0)
         klient.children.add(selectedImage)
 
-
+        val freq = 4000.0
         val mainFont = Font("Courier New", 16.0)
-        val filters = Label("Filters")
+        val filters = Label().apply { textProperty().bind(LocalesManager.getLocalizedBinding("FILTERS")) }
         filters.font = Font("Courier New", 24.0)
         val x = Label("x:").apply { font = mainFont }
         val y = Label("y:").apply { font = mainFont }
-        val nameField = TextField().apply { promptText = "Name" }
-        val coolnessIndex = TextField().apply { promptText = "Experience" }
-        val color = ComboBox<String>(FXCollections.observableArrayList<String>("Any", "Green", "Red", "Blue", "Yellow")).apply {
+        val nameField = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("NAME")) }
+        val coolnessIndex = TextField().apply { promptTextProperty().bind(LocalesManager.getLocalizedBinding("EXP")) }
+        val color = ComboBox<Rectangle>(FXCollections.observableArrayList<Rectangle>(
+                Rectangle(10.0, 10.0, Color.WHITE),
+                Rectangle(10.0, 10.0, Color.GREEN),
+                Rectangle(10.0, 10.0, Color.RED),
+                Rectangle(10.0, 10.0, Color.BLUE),
+                Rectangle(10.0, 10.0, Color.YELLOW)
+                )).apply {
             selectionModel.selectFirst()
+            onAction = EventHandler {
+                items[0] = Rectangle(10.0, 10.0, Color.WHITE)
+                items[1] = Rectangle(10.0, 10.0, Color.GREEN)
+                items[2] = Rectangle(10.0, 10.0, Color.RED)
+                items[3] = Rectangle(10.0, 10.0, Color.BLUE)
+                items[4] = Rectangle(10.0, 10.0, Color.YELLOW)
+            }
+            prefWidth = 30.0
         }
         val selectionHelperCoordX = ComboBox<String>(FXCollections.observableArrayList<String>("_", ">", "<", ">=", "<=")).apply {
             selectionModel.selectFirst()
@@ -104,6 +124,10 @@ class KlientForm : Application() {
         klient.children.add(userString)
         AnchorPane.setLeftAnchor(userString, 10.0)
         AnchorPane.setBottomAnchor(userString, 185.0)
+
+        // ************* CMD Messages *****************
+        // ********************************************
+
         val panel0 = Label("  You can type smth down here").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
@@ -174,6 +198,7 @@ class KlientForm : Application() {
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
+        val date = DatePicker()
         AnchorPane.setBottomAnchor(panel0, 205.0)
         AnchorPane.setBottomAnchor(panel1, 220.0)
         AnchorPane.setBottomAnchor(panel2, 235.0)
@@ -218,7 +243,7 @@ class KlientForm : Application() {
             panel3.text = panel2.text
             panel2.text = panel1.text
             panel1.text = panel0.text
-            panel0.text = "  " + message
+            panel0.text = "  $message"
             userString.text = ""
         }
         fun clear(){
@@ -303,6 +328,10 @@ class KlientForm : Application() {
         AnchorPane.setLeftAnchor(color, 10.0)
         AnchorPane.setBottomAnchor(color, 130.0)
 
+        /*klient.children.add(date)
+        AnchorPane.setLeftAnchor(date, 90.0)
+        AnchorPane.setBottomAnchor(date, 130.0)*/
+
         klient.children.add(filters)
         AnchorPane.setBottomAnchor(filters, 155.0)
         AnchorPane.setLeftAnchor(filters, 50.0)
@@ -337,9 +366,9 @@ class KlientForm : Application() {
                 ">=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex >= coolnessIndex.text.toInt() } }
                 "<=" -> { candidates = candidates.filter { it is AstroCircle && it.astronaut.coolnessIndex <= coolnessIndex.text.toInt() } }
             }
-            when (color.value){
-                "Any" -> {}
-                else -> candidates = candidates.filter { it is AstroCircle && it.astronaut.color == Colors.stringToColor(color.value) }
+            when (Colors.fillToColors(color.value.fill)){
+                Colors.Any -> {}
+                else -> candidates = candidates.filter { it is AstroCircle && it.astronaut.color == Colors.fillToColors(color.value.fill) }
             }
             return candidates
         }
@@ -356,7 +385,7 @@ class KlientForm : Application() {
                 astronauts.addAll(toBeAdded)
                 writeToCmd("Successfully.")
             } catch (s: SocketTimeoutException){
-                writeToCmd("Sorry, server isn`t responding now")
+                writeToCmd("Server isn`t responding now")
                 writeToCmd("Please, try again later")
             }
         }
@@ -398,8 +427,17 @@ class KlientForm : Application() {
         start.onMousePressed = EventHandler {
             start.style = "$baseCss -fx-background-color: Green; "
         }
+        start.onMouseReleased = EventHandler { start.style = baseCss }
         val animationUnits = ArrayList<ColorChanging>()
+        fun stopAnimation(){
+            start.text = "\uF04B"
+            animationUnits.forEach { it.stop() }
+            animationUnits.clear()
+            anima = false
+            writeToCmd("Animation stoped.")
+        }
         fun startAnimation(){
+            try{
             start.text = "\uf04d"
             anima = true
             val c = filter()
@@ -408,9 +446,12 @@ class KlientForm : Application() {
             writeToCmd("Filter values:")
             if (selectionHelperName.value.equals("_"))
                 writeToCmd("Name: Any")
+            else{
+                writeToCmd("Name ${selectionHelperName.value} ${nameField.text}")}
+            if (color.value.fill == Color.WHITE)
+                writeToCmd("Color: Any")
             else
-                writeToCmd("Name ${selectionHelperName.value} ${nameField.text}")
-            writeToCmd("Color: ${color.value}")
+                writeToCmd("Color: ${Colors.fillToColors(color.value.fill)}")
             if (selectionHelperExp.value.equals("_"))
                 writeToCmd("Experience: Any")
             else
@@ -426,18 +467,14 @@ class KlientForm : Application() {
             writeToCmd("********************")
             c.map {
                 if (it is AstroCircle) {
-                    val unit = ColorChanging(it, Color.BLACK)
+                    val unit = ColorChanging(it, Color.BLACK, freq)
                     animationUnits.add(unit)
                     unit.start()
                 }
+            }} catch (n: NumberFormatException) {
+                writeToCmd("Experience should be a number")
+                stopAnimation()
             }
-        }
-        fun stopAnimation(){
-            start.text = "\uF04B"
-            animationUnits.forEach { it.stop() }
-            animationUnits.clear()
-            anima = false
-            writeToCmd("Animation stoped.")
         }
         fun interpreteCommand(command: String){
             when (command){

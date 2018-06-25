@@ -5,10 +5,10 @@ import javafx.scene.paint.Color
 import javafx.util.Duration
 import ru.ifmo.se.laba7.server.Colors
 
-class ColorChanging(c: KlientForm.AstroCircle, col: Color) {
+class ColorChanging(c: KlientForm.AstroCircle, col: Color, duration: Double) {
     val circle = c
-    val transition = FillTransition(Duration(2000.0), c, Colors.colorToFill(c.astronaut.color), col)
-    val revTransition = FillTransition(Duration(2000.0), c, col, Colors.colorToFill(c.astronaut.color))
+    val transition = FillTransition(Duration(duration), c, Colors.colorToFill(c.astronaut.color), col)
+    val revTransition = FillTransition(Duration(duration), c, col, Colors.colorToFill(c.astronaut.color))
 
     fun start() {
         transition.isAutoReverse = true
