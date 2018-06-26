@@ -5,6 +5,7 @@ class Strings_ru_RU: ListResourceBundle() {
             arrayOf(
                     arrayOf("FILTERS", "Фильтры"),
                     arrayOf("NAME", "Имя"),
-                    arrayOf("EXP", "Опыт")
+                    arrayOf("EXP", "Опыт"),
+                    arrayOf("LANG", "Язык")
             )
 }

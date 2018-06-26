@@ -5,7 +5,8 @@ class Strings_en_US: ListResourceBundle() {
             arrayOf(
                     arrayOf("FILTERS", "Filters"),
                     arrayOf("NAME", "Name"),
-                    arrayOf("EXP", "Experience")
+                    arrayOf("EXP", "Experience"),
+                    arrayOf("LANG", "Language")
             )
 
 

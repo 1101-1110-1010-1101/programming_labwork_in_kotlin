@@ -12,6 +12,7 @@ fun main(args: Array<String>) {
     // I`m a GUI thread!
     launch {
         Application.launch(LoginForm::class.java)
+        System.exit(0)
     }
     // I`m the main thread!
     val ex = LoginForm.ex
