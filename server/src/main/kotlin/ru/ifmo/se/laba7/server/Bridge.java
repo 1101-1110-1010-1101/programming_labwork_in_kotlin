@@ -30,11 +30,8 @@ public class Bridge {
             packet = new DatagramPacket(buf, buf.length, address, port);
             String received
                     = new String(packet.getData(), 0, packet.getLength());
-            System.out.println(received);
             packet.setData(Connector.Companion.getM().getBytes());
-            System.out.println(Connector.Companion.getM());
             socket.send(packet);
-            System.out.println("Done");
         }
         socket.close();
     }

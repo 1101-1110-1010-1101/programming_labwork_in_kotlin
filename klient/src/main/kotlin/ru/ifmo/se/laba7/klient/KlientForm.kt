@@ -161,6 +161,8 @@ class KlientForm : Application() {
         var patternY = "Pattern: set y operator number"
         var patternDate = "Date Pattern: YYYY-MM-DD"
         var hello = "Hello User!"
+        var pattern = "Pattern:"
+        var cmdPattern = "set attribute operator value"
         fun changeCmdLang(l: String) {
             when (l) {
                 "eng" -> {
@@ -193,6 +195,8 @@ class KlientForm : Application() {
                     patternY = "Pattern: set y operator number"
                     patternDate = "Date Pattern: YYYY-MM-DD"
                     hello = "Hello User!"
+                    pattern = "Pattern:"
+                    cmdPattern = "set attribute operator value"
                 }
                 "rus" -> {
                     getCol = "Получаем коллекцию сервера..."
@@ -224,6 +228,8 @@ class KlientForm : Application() {
                     patternY = "Формат: set y оператор число"
                     patternDate = "Формат дфты: YYYY-MM-DD"
                     hello = "Привет пользователь!"
+                    pattern = "Формат:"
+                    cmdPattern = "set аттрибут оператор значение"
                 }
             }
         }
@@ -234,7 +240,7 @@ class KlientForm : Application() {
                     "-fx-text-fill: White"
             prefWidth = 185.0
         }
-        val panel1 = Label("  I`m a little fancy command line").apply {
+        val panel1 = Label("  Have a nice labwork =)").apply {
             style = "-fx-background-color: Black; " +
                     "-fx-text-fill: White"
             prefWidth = 185.0
@@ -507,12 +513,14 @@ class KlientForm : Application() {
             onAction = EventHandler {
                 LocalesManager.selectAnotherLocale(Locale("en", "US"))
                 changeCmdLang("eng")
+                Locale.setDefault(Locale.ENGLISH)
             }
         }
         val rus = MenuItem("Русский").apply {
             onAction = EventHandler {
                 LocalesManager.selectAnotherLocale(Locale("ru", "RU"))
                 changeCmdLang("rus")
+                Locale.setDefault(Locale("ru", "RU"))
             }
         }
         lang.items.addAll(eng, rus)
@@ -600,6 +608,7 @@ class KlientForm : Application() {
             }
         }
         fun setResolver(com: String){
+            try {
             val args = com.split(Regex(" "), 4)
             when (args[1]) {
                 "freq" -> {
@@ -682,6 +691,9 @@ class KlientForm : Application() {
                         date.value = LocalDate.parse(args[3])
                     } catch (d: DateTimeParseException) { writeToCmd(patternDate) }
                 }
+            } } catch (a: ArrayIndexOutOfBoundsException) {
+                writeToCmd(pattern)
+                writeToCmd(cmdPattern)
             }
         }
         fun interpreteCommand(command: String){
