@@ -13,13 +13,10 @@ public class Bridge {
     private boolean running;
     private byte[] buf = new byte[64000];
 
-    public Bridge() throws SocketException {
-        socket = new DatagramSocket(15000);
-    }
+    public Bridge() throws SocketException { socket = new DatagramSocket(15000); }
 
     public void run() throws IOException, InterruptedException {
         running = true;
-
         while (running) {
             DatagramPacket packet
                     = new DatagramPacket(buf, buf.length);
@@ -30,7 +27,16 @@ public class Bridge {
             packet = new DatagramPacket(buf, buf.length, address, port);
             String received
                     = new String(packet.getData(), 0, packet.getLength());
-            packet.setData(Connector.Companion.getM().getBytes());
+            System.out.println(received);
+            if (received.split(" ")[0].equals("connect"))
+                if (UserController.Companion.userLogin(received.split(" ")[1], received.split(" ")[2]))
+                    packet.setData("good".getBytes());
+                else packet.setData("sorry".getBytes());
+            else if (received.split(" ")[0].equals("reg")) {
+                UserController.Companion.registerUser(received.split(" ")[1], received.split(" ")[2]);
+                packet.setData("okay".getBytes());
+            }
+            else packet.setData(Connector.Companion.getM().getBytes());
             socket.send(packet);
         }
         socket.close();

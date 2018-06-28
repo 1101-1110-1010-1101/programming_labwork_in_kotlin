@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
   launch {
     bridge.run()
   }
-  
+
   // I`m a GUI listener!
   launch {
     while (true) {

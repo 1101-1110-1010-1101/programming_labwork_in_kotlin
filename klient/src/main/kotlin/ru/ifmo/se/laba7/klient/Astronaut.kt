@@ -24,7 +24,7 @@ data class Astronaut (
     companion object {
         private val com = Comparator.comparingDouble<Astronaut> { it.distance }
         fun parseCsv(csv: String): Astronaut =
-                csv.split(',').let { Astronaut(it[0], Coordinates(it[1].toDouble(), it[2].toDouble()), it[3].toInt(), Colors.stringToColor(it[4]), LocalDate.parse(it[5])) }
+                csv.split(',').let { Astronaut(it[0], Coordinates(it[1].substringBefore(" | ").toDouble(), it[1].substringAfter(" | ").toDouble()), it[2].toInt(), Colors.stringToColor(it[3]), LocalDate.parse(it[4])) }
     }
     fun get_name() = this.name
 
