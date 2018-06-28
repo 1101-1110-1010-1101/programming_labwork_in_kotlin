@@ -1,6 +1,7 @@
 package ru.ifmo.se.laba7.server
 
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class CSVHandler {
   companion object {
@@ -11,7 +12,7 @@ class CSVHandler {
             coordinates = Astronaut.Coordinates(it[1].substringBefore(" | ").toDouble(), it[1].substringAfter(" | ").toDouble()),
             coolnessIndex = it[2].toInt(),
             color = Colors.valueOf(it[3]),
-            initDate = LocalDate.parse(it[4]))
+            initDate = ZonedDateTime.parse(it[4]))
         }
   }
 }

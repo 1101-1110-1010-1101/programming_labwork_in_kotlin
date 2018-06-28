@@ -20,6 +20,7 @@ import ru.ifmo.se.laba7.server.Colors
 import ru.ifmo.se.laba7.server.LocalesManager
 import java.net.SocketTimeoutException
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeParseException
 import java.util.*
 
@@ -46,6 +47,13 @@ class KlientForm : Application() {
 
     fun createLoginForm(primaryStage: Stage): Scene {
 
+        val timeout = Alert(Alert.AlertType.ERROR).apply {
+            headerText = "Server is not responding right now"
+            contentText = "Please, try again later"
+        }
+        val reg = Alert(Alert.AlertType.INFORMATION).apply {
+            headerText = "Registration went successfully"
+        }
         val connect = Button("Connect")
         val register = Button("Registration")
         val login = TextField()
@@ -67,8 +75,11 @@ class KlientForm : Application() {
         val selectedImage = ImageView()
 
         register.onAction = EventHandler {
-            val kl = Klient()
-            val response = kl.sendEcho("reg ${login.text} ${pswrd.text}")
+            try {
+                val kl = Klient()
+                val response = kl.sendEcho("reg ${login.text} ${pswrd.text}")
+                reg.showAndWait()
+            } catch (s: SocketTimeoutException) { timeout.showAndWait() }
         }
 
         val image1 = Image(getResource("image.png"))
@@ -120,26 +131,28 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(roundButton, 5.0)
         AnchorPane.setLeftAnchor(roundButton, 5.0)
         connect.onAction = EventHandler {
-            val kl = Klient()
-            val response = kl.sendEcho("connect ${login.text} ${pswrd.text}")
-            if (response.equals("good")){
-                primaryStage.close()
-                primaryStage.scene = createKlientGUI(primaryStage)
-                primaryStage.show()
-            } else
-                name.textFill = Color.BLACK
-            name1.textFill = Color.BLACK
-            when (selectedImage.image) {
-                image1 -> selectedImage.image = err_image1
-                image2 -> selectedImage.image = err_image2
-            }
-            if (!loginform.children.contains(accesDenied)) {
-                loginform.children.add(accesDenied)
-                AnchorPane.setTopAnchor(accesDenied, 247.0)
-                AnchorPane.setRightAnchor(accesDenied, 7.0)
-            }
-            login.clear()
-            pswrd.clear()
+            try {
+                val kl = Klient()
+                val response = kl.sendEcho("connect ${login.text} ${pswrd.text}")
+                if (response.equals("good")) {
+                    primaryStage.close()
+                    primaryStage.scene = createKlientGUI(primaryStage)
+                    primaryStage.show()
+                } else
+                    name.textFill = Color.BLACK
+                name1.textFill = Color.BLACK
+                when (selectedImage.image) {
+                    image1 -> selectedImage.image = err_image1
+                    image2 -> selectedImage.image = err_image2
+                }
+                if (!loginform.children.contains(accesDenied)) {
+                    loginform.children.add(accesDenied)
+                    AnchorPane.setTopAnchor(accesDenied, 247.0)
+                    AnchorPane.setRightAnchor(accesDenied, 7.0)
+                }
+                login.clear()
+                pswrd.clear()
+            } catch (s: SocketTimeoutException) { timeout.showAndWait() }
         }
 
         roundButton.onAction = EventHandler {
@@ -260,106 +273,69 @@ class KlientForm : Application() {
         AnchorPane.setBottomAnchor(userString, 185.0)
 
         // ************* CMD Messages *****************
-        var getCol = "Getting collection from server..."
-        var success = "Successfully."
-        var notResp = "Server isn`t responding now"
-        var tryLater = "Please, try again later"
-        var animStop = "Animation stopped."
-        var animStart = "Animation Started"
-        var filterValues = "Filter values:"
-        var nameAny = "Name: Any"
-        var name = "Name "
-        var colorAny = "Color: Any"
-        var cmdColor = "Color: "
-        var expAny = "Experience: Any"
-        var cmdExp = "Experience "
-        var xAny = "x-coordinate: Any"
-        var cmdX = "x-coordinate "
-        var yAny = "y-coordinate: Any"
-        var cmdY = "y-coordinate "
-        var initAny = "Init Date: Any"
-        var cmdInit = "Init Date: "
-        var satisfied = "Conditions were satisfied by:"
-        var cmdAstro = " astronauts"
-        var expNum = "Experience should be a number"
-        var notNum = " is not a number"
-        var notCol = ": unknown color"
-        var notOper = ": unknown operator"
-        var patternX = "Pattern: set x operator number"
-        var patternY = "Pattern: set y operator number"
-        var patternDate = "Date Pattern: YYYY-MM-DD"
-        var hello = "Hello User!"
-        var pattern = "Pattern:"
-        var cmdPattern = "set attribute operator value"
-        fun changeCmdLang(l: String) {
-            when (l) {
-                "eng" -> {
-                    getCol = "Getting collection from server..."
-                    success = "Successfully."
-                    notResp = "Server isn`t responding now"
-                    tryLater = "Please, try again later"
-                    animStop = "Animation stopped."
-                    animStart = "Animation Started"
-                    filterValues = "Filter values:"
-                    nameAny = "Name: Any"
-                    name = "Name "
-                    colorAny = "Color: Any"
-                    cmdColor = "Color: "
-                    expAny = "Experience: Any"
-                    cmdExp = "Experience "
-                    xAny = "x-coordinate: Any"
-                    cmdX = "x-coordinate "
-                    yAny = "y-coordinate: Any"
-                    cmdY = "y-coordinate "
-                    initAny = "Init Date: Any"
-                    cmdInit = "Init Date: "
-                    satisfied = "Conditions were satisfied by:"
-                    cmdAstro = " astronauts"
-                    expNum = "Experience should be a number"
-                    notNum = " is not a number"
-                    notCol = ": unknown color"
-                    notOper = ": unknown operator"
-                    patternX = "Pattern: set x operator number"
-                    patternY = "Pattern: set y operator number"
-                    patternDate = "Date Pattern: YYYY-MM-DD"
-                    hello = "Hello User!"
-                    pattern = "Pattern:"
-                    cmdPattern = "set attribute operator value"
-                }
-                "rus" -> {
-                    getCol = "Получаем коллекцию сервера..."
-                    success = "Удачно."
-                    notResp = "Сервер не отвечает"
-                    tryLater = "Пожалуйста, попробуйте позже"
-                    animStop = "Анимация остановлена."
-                    animStart = "Анимация начата"
-                    filterValues = "Значения фильтров:"
-                    nameAny = "Имя: Любое"
-                    name = "Имя "
-                    colorAny = "Цвет: Любой"
-                    cmdColor = "Цвет: "
-                    expAny = "Опыт: Любой"
-                    cmdExp = "Опыт "
-                    xAny = "x-координата: Любая"
-                    cmdX = "x-координата "
-                    yAny = "y-координата: Любая"
-                    cmdY = "y-координата "
-                    initAny = "Дата: Любая"
-                    cmdInit = "Дата: "
-                    satisfied = "Условия были удовлетворены:"
-                    cmdAstro = " космонавтами"
-                    expNum = "Опыт должен быть числом"
-                    notNum = " не является числом"
-                    notCol = ": неизвестный цвет"
-                    notOper = ": неизвестный оператор"
-                    patternX = "Формат: set x оператор число"
-                    patternY = "Формат: set y оператор число"
-                    patternDate = "Формат дфты: YYYY-MM-DD"
-                    hello = "Привет пользователь!"
-                    pattern = "Формат:"
-                    cmdPattern = "set аттрибут оператор значение"
-                }
-            }
+        var getCol = LocalesManager.getLocalizedString("Getting collection from server...")
+        var success = LocalesManager.getLocalizedString("Successfully.")
+        var notResp = LocalesManager.getLocalizedString("Server isn`t responding now")
+        var tryLater = LocalesManager.getLocalizedString("Please, try again later")
+        var animStop = LocalesManager.getLocalizedString("Animation stopped.")
+        var animStart = LocalesManager.getLocalizedString("Animation Started")
+        var filterValues = LocalesManager.getLocalizedString("Filter values:")
+        var nameAny = LocalesManager.getLocalizedString("Name: Any")
+        var name = LocalesManager.getLocalizedString("Name ")
+        var colorAny = LocalesManager.getLocalizedString("Color: Any")
+        var cmdColor = LocalesManager.getLocalizedString("Color: ")
+        var expAny = LocalesManager.getLocalizedString("Experience: Any")
+        var cmdExp = LocalesManager.getLocalizedString("Experience ")
+        var xAny = LocalesManager.getLocalizedString("x-coordinate: Any")
+        var cmdX = LocalesManager.getLocalizedString("x-coordinate ")
+        var yAny = LocalesManager.getLocalizedString("y-coordinate: Any")
+        var cmdY = LocalesManager.getLocalizedString("y-coordinate ")
+        var initAny = LocalesManager.getLocalizedString("Init Date: Any")
+        var cmdInit = LocalesManager.getLocalizedString("Init Date: ")
+        var satisfied = LocalesManager.getLocalizedString("Conditions were satisfied by:")
+        var cmdAstro = LocalesManager.getLocalizedString(" astronauts")
+        var expNum = LocalesManager.getLocalizedString("Experience should be a number")
+        var notNum = LocalesManager.getLocalizedString(" is not a number")
+        var notCol = LocalesManager.getLocalizedString(": unknown color")
+        var notOper = LocalesManager.getLocalizedString(": unknown operator")
+        var patternX = LocalesManager.getLocalizedString("Pattern: set x operator number")
+        var patternY = LocalesManager.getLocalizedString("Pattern: set y operator number")
+        var patternDate = LocalesManager.getLocalizedString("Date Pattern: YYYY-MM-DD")
+        var hello = LocalesManager.getLocalizedString("Hello User!")
+        var pattern = LocalesManager.getLocalizedString("Pattern:")
+        var cmdPattern = LocalesManager.getLocalizedString("set attribute operator value")
+        fun setCmd() {
+            getCol = LocalesManager.getLocalizedString("Getting collection from server...")
+            success = LocalesManager.getLocalizedString("Successfully.")
+            notResp = LocalesManager.getLocalizedString("Server isn`t responding now")
+            tryLater = LocalesManager.getLocalizedString("Please, try again later")
+            animStop = LocalesManager.getLocalizedString("Animation stopped.")
+            animStart = LocalesManager.getLocalizedString("Animation Started")
+            filterValues = LocalesManager.getLocalizedString("Filter values:")
+            nameAny = LocalesManager.getLocalizedString("Name: Any")
+            name = LocalesManager.getLocalizedString("Name ")
+            colorAny = LocalesManager.getLocalizedString("Color: Any")
+            cmdColor = LocalesManager.getLocalizedString("Color: ")
+            expAny = LocalesManager.getLocalizedString("Experience: Any")
+            cmdExp = LocalesManager.getLocalizedString("Experience ")
+            xAny = LocalesManager.getLocalizedString("x-coordinate: Any")
+            cmdX = LocalesManager.getLocalizedString("x-coordinate ")
+            yAny = LocalesManager.getLocalizedString("y-coordinate: Any")
+            cmdY = LocalesManager.getLocalizedString("y-coordinate ")
+            initAny = LocalesManager.getLocalizedString("Init Date: Any")
+            cmdInit = LocalesManager.getLocalizedString("Init Date: ")
+            satisfied = LocalesManager.getLocalizedString("Conditions were satisfied by:")
+            cmdAstro = LocalesManager.getLocalizedString(" astronauts")
+            expNum = LocalesManager.getLocalizedString("Experience should be a number")
+            notNum = LocalesManager.getLocalizedString(" is not a number")
+            notCol = LocalesManager.getLocalizedString(": unknown color")
+            notOper = LocalesManager.getLocalizedString(": unknown operator")
+            patternX = LocalesManager.getLocalizedString("Pattern: set x operator number")
+            patternY = LocalesManager.getLocalizedString("Pattern: set y operator number")
+            patternDate = LocalesManager.getLocalizedString("Date Pattern: YYYY-MM-DD")
+            hello = LocalesManager.getLocalizedString("Hello User!")
+            pattern = LocalesManager.getLocalizedString("Pattern:")
+            cmdPattern = LocalesManager.getLocalizedString("set attribute operator value")
         }
         // ********************************************
 
@@ -610,7 +586,7 @@ class KlientForm : Application() {
             }
             when (date.value){
                 null -> {}
-                else -> candidates = candidates.filter { it is AstroCircle && it.astronaut.initDate == date.value }
+                else -> candidates = candidates.filter { it is AstroCircle && it.astronaut.initDate == date.value.atTime(it.astronaut.initDate.toLocalTime()).atZone(it.astronaut.initDate.zone) }
             }
             return candidates
         }
@@ -639,18 +615,39 @@ class KlientForm : Application() {
         val eng = MenuItem("English").apply {
             onAction = EventHandler {
                 LocalesManager.selectAnotherLocale(Locale("en", "US"))
-                changeCmdLang("eng")
+                setCmd()
                 Locale.setDefault(Locale.ENGLISH)
             }
         }
         val rus = MenuItem("Русский").apply {
             onAction = EventHandler {
                 LocalesManager.selectAnotherLocale(Locale("ru", "RU"))
-                changeCmdLang("rus")
+                setCmd()
                 Locale.setDefault(Locale("ru", "RU"))
             }
         }
-        lang.items.addAll(eng, rus)
+        val bel = MenuItem("Беларускі").apply {
+            onAction = EventHandler {
+                LocalesManager.selectAnotherLocale(Locale("be", "BY"))
+                setCmd()
+                Locale.setDefault(Locale("be", "BY"))
+            }
+        }
+        val fra = MenuItem("Français").apply {
+            onAction = EventHandler {
+                LocalesManager.selectAnotherLocale(Locale("fr", "FR"))
+                setCmd()
+                Locale.setDefault(Locale("fr", "FR"))
+            }
+        }
+        val esp = MenuItem("Español").apply {
+            onAction = EventHandler {
+                LocalesManager.selectAnotherLocale(Locale("es", "DO"))
+                setCmd()
+                Locale.setDefault(Locale("es", "DO"))
+            }
+        }
+        lang.items.addAll(eng, rus, bel, fra, esp)
         menuBar.menus.addAll(lang)
 
         val roundButton = Button("\uf2f1")

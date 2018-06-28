@@ -2,6 +2,7 @@ package ru.ifmo.se.laba7.server
 
 import ru.ifmo.se.ridethemapping.RTM
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.util.*
 
 @RTM.Table("astronauts")
@@ -10,7 +11,7 @@ data class Astronaut(
     var coordinates: Coordinates = Coordinates(Random().nextDouble() * Random().nextInt(1000), Random().nextDouble() * Random().nextInt(1000)),
     var coolnessIndex: Int = Random().nextInt(1000) + 500,
     var color: Colors = Colors.Blue,
-    var initDate: LocalDate = LocalDate.now(),
+    var initDate: ZonedDateTime = ZonedDateTime.now(),
     @field:RTM.PrimaryKey
     var id: Int = 0
 ): Comparable<Astronaut>{

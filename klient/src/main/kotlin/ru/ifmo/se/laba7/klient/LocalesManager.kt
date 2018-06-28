@@ -14,4 +14,6 @@ object LocalesManager {
         init { bind(resources) }
         override fun computeValue(): String = resources.get().getString(key)
     })
+
+    fun getLocalizedString(key: String) =  resources.get().getString(key)
 }

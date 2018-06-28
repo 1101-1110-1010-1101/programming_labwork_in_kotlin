@@ -3,6 +3,7 @@ package ru.ifmo.se.laba7.server
 import ru.ifmo.se.ridethemapping.PrimaryKey
 import ru.ifmo.se.ridethemapping.RTM
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class DBHandler {
 
@@ -18,7 +19,7 @@ class DBHandler {
           Astronaut.Coordinates(l[3].substringBefore(" | ").toDouble(), l[3].substringAfter(" | ").toDouble()),
           l[4].toInt(),
           Colors.valueOf(l[5]),
-          LocalDate.parse(l[6]),
+          ZonedDateTime.parse(l[6]),
           l[7].toInt()))
     return result
   }
