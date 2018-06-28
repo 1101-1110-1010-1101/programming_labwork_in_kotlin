@@ -7,8 +7,6 @@ import kotlinx.coroutines.experimental.launch
 fun main(args: Array<String>) {
 
   val bridge = Bridge()
-
-
   // I`m a GUI thread!
   launch {
     Application.launch(LoginForm::class.java)
@@ -16,17 +14,15 @@ fun main(args: Array<String>) {
   }
   // I`m the main thread!
   val ex = LoginForm.ex
-  val collection = UserCollection()
+  val collection = UserCollection(DBHandler())
   collection.load()
-  collection.sorted()
   ex.exchange(collection)
   Connector.m = collection.map { it.csv() }.joinToString("||")
   // I`m the client listener!
   launch {
     bridge.run()
   }
-
-
+  
   // I`m a GUI listener!
   launch {
     while (true) {
@@ -36,7 +32,7 @@ fun main(args: Array<String>) {
         LoginForm.message = ""
         when (command) {
           "add" -> {
-            collection.add(Astronaut.parseCsv(argument))
+            collection.add(CSVHandler.parseCsv(argument))
             ex.exchange(collection)
             Connector.m = collection.map { it.csv() }.joinToString("||")
           }
@@ -73,6 +69,5 @@ fun main(args: Array<String>) {
       }
     }
   }
-  while (true) {
-  }
+  while (true) {}
 }

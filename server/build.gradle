@@ -28,6 +28,8 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21"
     compile("org.mindrot:jbcrypt:0.4")
+    compile("org.postgresql:postgresql:42.2.2")
+    compile("org.jetbrains.kotlin:kotlin-reflect:1.2.50")
 }
 apply plugin: 'kotlin'
 

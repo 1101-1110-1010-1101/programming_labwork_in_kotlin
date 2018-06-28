@@ -1,37 +1,40 @@
 package ru.ifmo.se.laba7.server
 
+import ru.ifmo.se.ridethemapping.RTM
 import java.time.LocalDate
 import java.util.*
-import kotlin.Comparator
 
+@RTM.Table("astronauts")
 data class Astronaut(
-    val name: String = "",
-    val coordinates: Coordinates = Coordinates(Random().nextDouble() * Random().nextInt(1000), Random().nextDouble() * Random().nextInt(1000)),
-    val coolnessIndex: Int = Random().nextInt(1000) + 500,
-    val color: Colors = Colors.Blue,
-    val initDate: LocalDate = LocalDate.now()
-) : Comparable<Astronaut> {
+    var name: String = "",
+    var coordinates: Coordinates = Coordinates(Random().nextDouble() * Random().nextInt(1000), Random().nextDouble() * Random().nextInt(1000)),
+    var coolnessIndex: Int = Random().nextInt(1000) + 500,
+    var color: Colors = Colors.Blue,
+    var initDate: LocalDate = LocalDate.now(),
+    @field:RTM.PrimaryKey
+    var id: Int = 0
+): Comparable<Astronaut>{
   val distance = Math.sqrt(Math.pow(this.coordinates.x, 2.0) + Math.pow(this.coordinates.y, 2.0))
-  public val printCoors = String.format("%.2f", coordinates.x) + " " + String.format("%.2f", coordinates.y)
+  public var printCoors = String.format("%.2f", coordinates.x) + " " + String.format("%.2f", coordinates.y)
 
-  data class Coordinates(val x: Double, val y: Double) {
-    override fun toString(): String = this.x.toString() + ',' + this.y.toString()
+  fun refreshCoors() {
+    printCoors = String.format("%.2f", coordinates.x) + " " + String.format("%.2f", coordinates.y)
   }
 
-  fun ClosedRange<Double>.random() = Random().nextDouble() + start
-
-  fun csv(): String = this.name + ',' + this.coordinates.toString() + ',' + this.coolnessIndex + ',' + this.color.toString() + ',' + this.initDate
-
-  companion object {
-    private val com = Comparator.comparingDouble<Astronaut> { it.distance }
-    fun parseCsv(csv: String): Astronaut =
-        csv.split(',').let {
-          Astronaut(it[0], Coordinates(it[1].toDouble(), it[2].toDouble()), it[3].toInt(), Colors.valueOf(it[4]), LocalDate.parse(it[5]))
-        }
+  data class Coordinates(var x: Double, var y: Double) {
+    override fun toString(): String = this.x.toString() + " | " + this.y.toString()
   }
+
+  fun csv(): String = this.name + ',' + this.coordinates.toString() + ',' + this.coolnessIndex + ',' + this.color.name + ',' + this.initDate
 
   fun get_name() = this.name
 
-  override fun compareTo(other: Astronaut) = com.compare(this, other)
+  override fun compareTo(other: Astronaut): Int {
+    if (this.distance > other.distance)
+      return 1
+    else if (this.distance < other.distance)
+      return -1
+    else return 0
+  }
 }
 

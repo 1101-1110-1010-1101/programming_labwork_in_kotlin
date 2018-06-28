@@ -14,12 +14,13 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.stage.Stage
-import java.io.FileInputStream
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.Exchanger
 
 class LoginForm : Application() {
+
+  fun getResource(path: String) = javaClass.classLoader.getResource(path).openStream()
 
   companion object {
     @Volatile
@@ -28,7 +29,7 @@ class LoginForm : Application() {
     var message = ""
   }
 
-  val col = UserCollection()
+  val col = UserCollection(DBHandler())
   private val userController = UserController()
 
   fun createLoginForm(primaryStage: Stage): Scene {
@@ -57,10 +58,10 @@ class LoginForm : Application() {
 
     register.onAction = EventHandler { userController.register(login.text, pswrd.text) }
 
-    val image1 = Image(FileInputStream("F:\\ITMO\\Programming\\laba7\\server\\res\\image.png"))
-    val image2 = Image(FileInputStream("F:\\ITMO\\Programming\\laba7\\server\\res\\logo.png"))
-    val err_image1 = Image(FileInputStream("F:\\ITMO\\Programming\\laba7\\server\\res\\err_image(dark).png"))
-    val err_image2 = Image(FileInputStream("F:\\ITMO\\Programming\\laba7\\server\\res\\err_image(light).png"))
+    val image1 = Image(getResource("image.png"))
+    val image2 = Image(getResource("logo.png"))
+    val err_image1 = Image(getResource("err_image(dark).png"))
+    val err_image2 = Image(getResource("err_image(light).png"))
     selectedImage.apply {
       image = image1
       fitHeight = 360.0
@@ -323,6 +324,51 @@ class LoginForm : Application() {
     AnchorPane.setLeftAnchor(table, 170.0)
     AnchorPane.setTopAnchor(table, 30.0)
     table.items = refreshTable()
+    var editing = false
+    fun editRow(a: Astronaut) {
+      coolnessIndex.textProperty().addListener { _, _, newValue ->
+        if (editing)
+          try {
+            table.selectionModel.selectedItem.coolnessIndex = newValue.toInt()
+            table.refresh()
+          } catch (n: NumberFormatException) { expException.showAndWait() }
+      }
+      nameField.textProperty().addListener { _, _, newValue ->
+        if (editing) {
+          table.selectionModel.selectedItem.name = newValue
+          table.refresh()
+        }
+      }
+      sliderX.valueProperty().addListener { _, _, newValue ->
+        if (editing) {
+          table.selectionModel.selectedItem.coordinates.x = newValue.toDouble()
+          table.selectionModel.selectedItem.refreshCoors()
+          table.refresh()
+        }
+      }
+      sliderY.valueProperty().addListener { _, _, newValue ->
+        if (editing) {
+          table.selectionModel.selectedItem.coordinates.y = newValue.toDouble()
+          table.selectionModel.selectedItem.refreshCoors()
+          table.refresh()
+        }
+      }
+      color.valueProperty().addListener { _, _, newValue ->
+        if (editing) {
+          table.selectionModel.selectedItem.color = Colors.fillToColors(newValue.fill)
+          table.refresh()
+        }
+      }
+    }
+    table.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+      kotlin.run {
+        try {
+          editing = true
+          editRow(newValue)
+        } catch (i: IllegalStateException) { editing = false }
+      }
+    }
+
 
     addB.onAction = EventHandler {
       try {
@@ -398,11 +444,21 @@ class LoginForm : Application() {
     val rus = MenuItem("Русский")
     val eng = MenuItem("English")
     lang.items.addAll(rus, eng)
-    rus.onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("ru", "RU")) }
-    eng.onAction = EventHandler { LocalesManager.selectAnotherLocale(Locale("en", "US")) }
+    rus.onAction = EventHandler {
+      LocalesManager.selectAnotherLocale(Locale("ru", "RU"))
+      table.items = refreshTable()
+    }
+    eng.onAction = EventHandler {
+      LocalesManager.selectAnotherLocale(Locale("en", "US"))
+      table.items = refreshTable()
+    }
     save_load.items.addAll(saveM, loadM)
     menuBar.menus.addAll(save_load, lang)
     server.children.add(menuBar)
+
+    val editMenu = ContextMenu()
+    val edit = MenuItem("Edit")
+    editMenu.items.add(edit)
 
     return Scene(server, 580.0, 335.0)
   }
